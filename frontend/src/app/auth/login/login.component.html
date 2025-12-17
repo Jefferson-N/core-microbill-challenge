@@ -1,0 +1,38 @@
+<div class="login-container">
+  <h2><i class="pi pi-lock"></i> Login</h2>
+
+  <form (ngSubmit)="onSubmit()" #loginForm="ngForm">
+    <div class="p-field">
+      <label for="username"><i class="pi pi-user"></i> Username</label>
+      <input id="username" type="text" pInputText [(ngModel)]="username" name="username" required />
+    </div>
+
+    <div class="p-field">
+      <label for="password"><i class="pi pi-key"></i> Password</label>
+      <p-password [(ngModel)]="password" name="password" placeholder="Ingrese su contraseña" required>
+      </p-password>
+    </div>
+
+    <button pButton type="submit" label="Login" icon="pi pi-sign-in" [disabled]="!loginForm.valid"></button>
+
+    <button pButton type="button" label="Registrarse" icon="pi pi-user-plus" class="p-button-secondary p-ml-2"
+            (click)="registerDialogVisible = true"></button>
+  </form>
+</div>
+
+<!-- Modal de registro -->
+<p-dialog header="Registro de Usuario" [(visible)]="registerDialogVisible" [modal]="true" [closable]="true" [style]="{width: '400px'}">
+  <form (ngSubmit)="onRegister()" #registerForm="ngForm">
+    <div class="p-field">
+      <label for="regUsername"><i class="pi pi-user"></i> Username</label>
+      <input id="regUsername" type="text" pInputText [(ngModel)]="regUsername" name="regUsername" required />
+    </div>
+
+    <div class="p-field">
+      <label for="regPassword"><i class="pi pi-key"></i> Password</label>
+      <p-password [(ngModel)]="regPassword" name="regPassword" placeholder="Ingrese su contraseña" required></p-password>
+    </div>
+
+    <button pButton type="submit" label="Registrar" icon="pi pi-check" [disabled]="!registerForm.valid"></button>
+  </form>
+</p-dialog>

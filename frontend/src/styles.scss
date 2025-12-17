@@ -1,0 +1,32 @@
+ 
+.content {
+  flex: 1;
+  padding: .5rem;
+  background: #f9f9f9;
+}
+
+.p-field {
+  margin-bottom: 0.5rem;        
+}
+
+.p-field label {
+  display: block;         
+  margin-bottom: 0.25rem;  
+  font-weight: 600;       
+  color: #333;
+}
+
+.p-field input,
+.p-field .p-inputtext,
+.p-field .p-select {
+  width: 100%;             
+  padding: 0.20rem;         
+  border-radius: 100vh;      
+  border: 1px solid #ccc;  
+}
+
+.p-field input:focus,
+.p-field .p-inputtext:focus {
+  border-color: #007ad9;     
+  outline: none;
+}

@@ -1,0 +1,76 @@
+<div class="invoice-container">
+  <div class="header-section">
+    <h2>Gestión de Facturas</h2>
+    <button 
+      pButton 
+      label="Nueva Factura" 
+      icon="pi pi-plus" 
+      class="p-button-success"
+      routerLink="/invoice-form">
+    </button>
+  </div>
+
+  <p-table 
+    [value]="invoices" 
+    [loading]="loading"
+    class="p-datatable-striped" 
+    [paginator]="true" 
+    [rows]="10"
+    [rowsPerPageOptions]="[5,10,20]" 
+    [responsiveLayout]="'scroll'">
+    
+    <ng-template pTemplate="header">
+      <tr>
+        <th>ID</th>
+        <th>Cliente</th>
+        <th>Proveedor</th>
+        <th>Fecha</th>
+        <th>Subtotal</th>
+        <th>Impuestos</th>
+        <th>Total</th>
+        <th>Estado</th>
+        <th>Acciones</th>
+      </tr>
+    </ng-template>
+    
+    <ng-template pTemplate="body" let-invoice>
+      <tr>
+        <td>{{ invoice.id }}</td>
+        <td>{{ invoice.customer?.name || 'N/A' }}</td>
+        <td>{{ invoice.provider?.name || 'N/A' }}</td>
+        <td>{{ invoice.issueDate | date:'short' }}</td>
+        <td>{{ invoice.subtotal | currency:'USD':'symbol':'1.2-2' }}</td>
+        <td>{{ invoice.taxTotal | currency:'USD':'symbol':'1.2-2' }}</td>
+        <td>{{ invoice.total | currency:'USD':'symbol':'1.2-2' }}</td>
+        <td>
+          <span class="p-tag" 
+                [ngClass]="{
+                  'p-tag-success': invoice.status === 'PAID',
+                  'p-tag-warning': invoice.status === 'ISSUED',
+                  'p-tag-info': invoice.status === 'DRAFT',
+                  'p-tag-danger': invoice.status === 'CANCELLED'
+                }">
+            {{ invoice.status }}
+          </span>
+        </td>
+        <td>
+          <button 
+            pButton 
+            icon="pi pi-trash" 
+            class="p-button-rounded p-button-danger"
+            (click)="deleteInvoice(invoice.id!)" 
+            pTooltip="Eliminar factura">
+          </button>
+        </td>
+      </tr>
+    </ng-template>
+    
+    <ng-template pTemplate="emptymessage">
+      <tr>
+        <td colspan="9" class="text-center">No hay facturas disponibles</td>
+      </tr>
+    </ng-template>
+  </p-table>
+  
+  <p-toast></p-toast>
+</div>

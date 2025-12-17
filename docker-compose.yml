@@ -1,0 +1,114 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: microbill-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: microbill_db
+      MYSQL_USER: microbill_user
+      MYSQL_PASSWORD: microbill_pass
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./backend/database/container-script/init.sql:/docker-entrypoint-initdb.d/01-init.sql
+    networks:
+      - microbill-network
+
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: microbill-rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    networks:
+      - microbill-network
+
+  auth-service:
+    build:
+      context: ./backend/microbill-authentication-service
+      dockerfile: Dockerfile
+    container_name: microbill-auth-service
+    environment:
+      DB_URL: jdbc:mysql://mysql:3306/microbill_db
+      DB_USERNAME: microbill_user
+      DB_PASSWORD: microbill_pass
+    ports:
+      - "8079:8079"
+    depends_on:
+      - mysql
+    networks:
+      - microbill-network
+
+  management-service:
+    build:
+      context: ./backend/microbill-management-service
+      dockerfile: Dockerfile
+    container_name: microbill-management-service
+    environment:
+      DB_URL: jdbc:mysql://mysql:3306/microbill_db
+      DB_USERNAME: microbill_user
+      DB_PASSWORD: microbill_pass
+    ports:
+      - "8081:8081"
+    depends_on:
+      - mysql
+    networks:
+      - microbill-network
+
+  billing-service:
+    build:
+      context: ./backend/microbill-billing-service
+      dockerfile: Dockerfile
+    container_name: microbill-billing-service
+    environment:
+      DB_URL: jdbc:mysql://mysql:3306/microbill_db
+      DB_USERNAME: microbill_user
+      DB_PASSWORD: microbill_pass
+      RABBITMQ_HOST: rabbitmq
+    ports:
+      - "8080:8080"
+    depends_on:
+      - mysql
+      - rabbitmq
+    networks:
+      - microbill-network
+
+  ai-service:
+    build:
+      context: ./backend/microbill-billing-ia
+      dockerfile: Dockerfile
+    container_name: microbill-ai-service
+    ports:
+      - "8082:8082"
+    networks:
+      - microbill-network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: microbill-frontend
+    ports:
+      - "4200:80"
+    depends_on:
+      - auth-service
+      - management-service
+      - billing-service
+    networks:
+      - microbill-network
+
+volumes:
+  mysql_data:
+  rabbitmq_data:
+
+networks:
+  microbill-network:
+    driver: bridge

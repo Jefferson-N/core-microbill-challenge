@@ -1,0 +1,111 @@
+.dashboard {
+  display: flex;
+  height: 100vh;
+  font-family: 'Segoe UI', sans-serif;
+
+  .sidebar {
+    width: 220px;
+    background: #2c3e50;
+    color: #fff;
+    padding: 1rem;
+    transition: transform 0.3s ease;
+
+    h2 {
+      margin-bottom: 1rem;
+      font-size: 1.4rem;
+      font-weight: bold;
+    }
+
+    nav a {
+      display: block;
+      color: #ecf0f1;
+      padding: 0.6rem;
+      margin-bottom: 0.4rem;
+      border-radius: 4px;
+      text-decoration: none;
+      transition: background 0.3s;
+
+      &.active {
+        background: #34495e;
+        font-weight: bold;
+      }
+
+      &:hover {
+        background: #3d566e;
+      }
+    }
+  }
+
+  .main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #1976d2;
+      color: #fff;
+      padding: 0.8rem 1rem;
+
+      h1 {
+        font-size: 1.2rem;
+      }
+
+      .menu-btn {
+        display: none; 
+        background: none;
+        border: none;
+        font-size: 1.5rem;
+        color: #fff;
+        cursor: pointer;
+      }
+
+      .logout-btn {
+        background: #e74c3c;
+        border: none;
+        padding: 0.5rem 1rem;
+        border-radius: 4px;
+        color: #fff;
+        cursor: pointer;
+        transition: background 0.3s;
+
+        &:hover {
+          background: #c0392b;
+        }
+      }
+    }
+
+    .content {
+      flex: 1;
+      padding: 1rem;
+      background: #f4f6f9;
+      overflow-y: auto;
+    }
+  }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .dashboard {
+    flex-direction: column;
+
+    .sidebar {
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 100%;
+      transform: translateX(-100%);
+      z-index: 1000;
+    }
+
+    .sidebar.open {
+      transform: translateX(0);
+    }
+
+    .main .header .menu-btn {
+      display: inline-block;
+    }
+  }
+}

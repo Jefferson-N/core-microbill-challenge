@@ -1,0 +1,27 @@
+<div class="dashboard">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <h2>Menú</h2>
+    <nav>
+      <a routerLink="/dashboard" routerLinkActive="active">Dashboard</a>
+      <a routerLink="/customers" routerLinkActive="active">Clientes</a>
+      <a routerLink="/providers" routerLinkActive="active">Proveedores</a>
+      <a routerLink="/products" routerLinkActive="active">Productos</a>
+      <a routerLink="/invoices" routerLinkActive="active">Facturas</a>
+      <a routerLink="/invoice-form" routerLinkActive="active">Nueva Factura</a>
+      <a routerLink="/reports" routerLinkActive="active">Reportes</a>
+    </nav>
+  </aside>
+
+  <div class="main">
+    <header class="header">
+      <button class="menu-btn" (click)="toggleSidebar()">☰</button>
+      <h1>Dashboard</h1>
+      <button class="logout-btn" (click)="logout()">Salir</button>
+    </header>
+
+    <section class="content">
+      <router-outlet></router-outlet>
+    </section>
+  </div>
+</div>

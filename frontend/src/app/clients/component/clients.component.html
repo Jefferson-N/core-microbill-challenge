@@ -1,0 +1,89 @@
+<div class="customer-container">
+  <div class="flex justify-content-between align-items-center mb-4">
+    <h2>Gestión de Clientes</h2>
+    <p-button label="Nuevo Cliente" icon="pi pi-plus" (onClick)="openNew()"></p-button>
+  </div>
+
+  <!-- Search -->
+  <div class="mb-3">
+    <div class="p-inputgroup">
+      <input type="text" pInputText placeholder="Buscar clientes..." [(ngModel)]="searchValue">
+      <p-button icon="pi pi-search" (onClick)="onSearch()"></p-button>
+    </div>
+  </div>
+
+  <!-- Table -->
+  <p-table [value]="customers" [tableStyle]="{'min-width': '50rem'}">
+    <ng-template pTemplate="header">
+      <tr>
+        <th>Documento</th>
+        <th>Nombre</th>
+        <th>Email</th>
+        <th>Dirección</th>
+        <th>Acciones</th>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-customer>
+      <tr>
+        <td>{{ customer.docNumber }}</td>
+        <td>{{ customer.name }}</td>
+        <td>{{ customer.email }}</td>
+        <td>{{ customer.address }}</td>
+        <td>
+          <p-button icon="pi pi-pencil" class="p-button-rounded p-button-warning mr-2" 
+            (onClick)="editCustomer(customer)" size="small"></p-button>
+          <p-button icon="pi pi-trash" class="p-button-rounded p-button-danger" 
+            (onClick)="deleteCustomer(customer)" size="small"></p-button>
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+
+  <!-- Pagination -->
+  <p-paginator 
+    [rows]="rows" 
+    [totalRecords]="totalRecords" 
+    [first]="first"
+    (onPageChange)="onPageChange($event)">
+  </p-paginator>
+
+  <!-- Dialog -->
+  <p-dialog header="{{ customer.id ? 'Editar Cliente' : 'Nuevo Cliente' }}" 
+    [(visible)]="customerDialog" [modal]="true" [style]="{width: '450px'}">
+    <form class="p-fluid">
+      <div class="field">
+        <label for="name">Nombre *</label>
+        <input id="name" type="text" pInputText [(ngModel)]="customer.name" 
+          name="name" required [class.ng-invalid]="submitted && !customer.name">
+        <small class="p-error" *ngIf="submitted && !customer.name">El nombre es requerido.</small>
+      </div>
+      
+      <div class="field">
+        <label for="docNumber">Documento *</label>
+        <input id="docNumber" type="text" pInputText [(ngModel)]="customer.docNumber" 
+          name="docNumber" required [class.ng-invalid]="submitted && !customer.docNumber">
+        <small class="p-error" *ngIf="submitted && !customer.docNumber">El documento es requerido.</small>
+      </div>
+      
+      <div class="field">
+        <label for="email">Email *</label>
+        <input id="email" type="email" pInputText [(ngModel)]="customer.email" 
+          name="email" required [class.ng-invalid]="submitted && !customer.email">
+        <small class="p-error" *ngIf="submitted && !customer.email">El email es requerido.</small>
+      </div>
+      
+      <div class="field">
+        <label for="address">Dirección</label>
+        <input id="address" type="text" pInputText [(ngModel)]="customer.address" name="address">
+      </div>
+    </form>
+    
+    <ng-template pTemplate="footer">
+      <p-button label="Cancelar" icon="pi pi-times" class="p-button-text" (onClick)="hideDialog()"></p-button>
+      <p-button label="Guardar" icon="pi pi-check" (onClick)="saveCustomer()"></p-button>
+    </ng-template>
+  </p-dialog>
+
+  <p-confirmDialog></p-confirmDialog>
+  <p-toast></p-toast>
+</div>
