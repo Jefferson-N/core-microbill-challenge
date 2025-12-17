@@ -1,0 +1,173 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database for Auth Service
+  postgres-auth:
+    image: postgres:16-alpine
+    container_name: microbill-postgres-auth
+    environment:
+      POSTGRES_DB: microbill_auth
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-auth-data:/var/lib/postgresql/data
+    networks:
+      - microbill-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # PostgreSQL Database for Management Service
+  postgres-management:
+    image: postgres:16-alpine
+    container_name: microbill-postgres-management
+    environment:
+      POSTGRES_DB: microbill_management
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres-management-data:/var/lib/postgresql/data
+    networks:
+      - microbill-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # PostgreSQL Database for Billing Service
+  postgres-billing:
+    image: postgres:16-alpine
+    container_name: microbill-postgres-billing
+    environment:
+      POSTGRES_DB: microbill_billing
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5434:5432"
+    volumes:
+      - postgres-billing-data:/var/lib/postgresql/data
+    networks:
+      - microbill-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # RabbitMQ Message Broker
+  rabbitmq:
+    image: rabbitmq:3.13-management-alpine
+    container_name: microbill-rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: admin
+      RABBITMQ_DEFAULT_PASS: admin
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+    networks:
+      - microbill-network
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Authentication Service
+  auth-service:
+    build:
+      context: ./microbill-authentication-service
+      dockerfile: Dockerfile
+    container_name: microbill-auth-service
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-auth:5432/microbill_auth
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      JWT_SECRET: microbill-secret-key-change-in-production-2024
+      JWT_EXPIRATION: 86400000
+    ports:
+      - "8081:8081"
+    depends_on:
+      postgres-auth:
+        condition: service_healthy
+    networks:
+      - microbill-network
+    restart: unless-stopped
+
+  # Management Service
+  management-service:
+    build:
+      context: ./microbill-management-service
+      dockerfile: Dockerfile
+    container_name: microbill-management-service
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-management:5432/microbill_management
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+    ports:
+      - "8082:8082"
+    depends_on:
+      postgres-management:
+        condition: service_healthy
+    networks:
+      - microbill-network
+    restart: unless-stopped
+
+  # Billing Service
+  billing-service:
+    build:
+      context: ./microbill-billing-service
+      dockerfile: Dockerfile
+    container_name: microbill-billing-service
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-billing:5432/microbill_billing
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_RABBITMQ_PORT: 5672
+      SPRING_RABBITMQ_USERNAME: admin
+      SPRING_RABBITMQ_PASSWORD: admin
+      AI_SERVICE_URL: http://ai-service:8084
+    ports:
+      - "8083:8083"
+    depends_on:
+      postgres-billing:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - microbill-network
+    restart: unless-stopped
+
+  # AI Service (Python)
+  ai-service:
+    build:
+      context: ./microbill-billing-ia
+      dockerfile: Dockerfile
+    container_name: microbill-ai-service
+    ports:
+      - "8084:8084"
+    networks:
+      - microbill-network
+    restart: unless-stopped
+
+volumes:
+  postgres-auth-data:
+  postgres-management-data:
+  postgres-billing-data:
+  rabbitmq-data:
+
+networks:
+  microbill-network:
+    driver: bridge

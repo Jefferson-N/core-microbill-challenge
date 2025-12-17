@@ -1,0 +1,160 @@
+openapi: 3.0.3
+info:
+  title: MicroBill AI Service API
+  description: AI service for product recommendations and anomaly detection
+  version: 1.0.0
+servers:
+  - url: http://localhost:8084
+    description: Local server
+
+tags:
+  - name: AI
+    description: Artificial Intelligence operations
+
+paths:
+  /health:
+    get:
+      tags:
+        - Health
+      summary: Health check
+      operationId: healthCheck
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+
+  /api/ai/recommendations:
+    post:
+      tags:
+        - AI
+      summary: Get product recommendations for a customer
+      operationId: getRecommendations
+      parameters:
+        - name: customerId
+          in: query
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Recommendations generated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RecommendationResponse'
+
+  /api/ai/anomaly-score:
+    post:
+      tags:
+        - AI
+      summary: Detect anomalies in invoice
+      operationId: detectAnomaly
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AnomalyRequest'
+      responses:
+        '200':
+          description: Anomaly detection completed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AnomalyResponse'
+
+components:
+  schemas:
+    ProductRecommendation:
+      type: object
+      properties:
+        productId:
+          type: integer
+          format: int64
+        productName:
+          type: string
+        score:
+          type: number
+          format: float
+        reason:
+          type: string
+
+    RecommendationResponse:
+      type: object
+      properties:
+        customerId:
+          type: integer
+          format: int64
+        products:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProductRecommendation'
+        generatedAt:
+          type: string
+          format: date-time
+
+    InvoiceItem:
+      type: object
+      required:
+        - productId
+        - quantity
+        - unitPrice
+        - taxRate
+      properties:
+        productId:
+          type: integer
+          format: int64
+        quantity:
+          type: integer
+        unitPrice:
+          type: number
+          format: double
+        taxRate:
+          type: number
+          format: double
+
+    AnomalyRequest:
+      type: object
+      required:
+        - invoiceId
+        - customerId
+        - items
+        - total
+      properties:
+        invoiceId:
+          type: integer
+          format: int64
+        customerId:
+          type: integer
+          format: int64
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/InvoiceItem'
+        total:
+          type: number
+          format: double
+
+    AnomalyResponse:
+      type: object
+      properties:
+        invoiceId:
+          type: integer
+          format: int64
+        score:
+          type: number
+          format: float
+          description: Anomaly score from 0.0 (normal) to 1.0 (highly anomalous)
+        isAnomaly:
+          type: boolean
+          description: True if score > 0.5
+        explanation:
+          type: string
+          description: Human-readable explanation of the anomaly detection result
