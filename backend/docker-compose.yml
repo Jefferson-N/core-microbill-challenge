@@ -1,62 +1,60 @@
 version: '3.8'
 
 services:
-  # PostgreSQL Database for Auth Service
-  postgres-auth:
-    image: postgres:16-alpine
-    container_name: microbill-postgres-auth
+  # MySQL Database for Auth Service
+  mysql-auth:
+    image: mysql:8.0
+    container_name: microbill-mysql-auth
     environment:
-      POSTGRES_DB: microbill_auth
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_DATABASE: ${DB_NAME_AUTH}
     ports:
-      - "5432:5432"
+      - "${DB_PORT_AUTH}:3306"
     volumes:
-      - postgres-auth-data:/var/lib/postgresql/data
+      - mysql-auth-data:/var/lib/mysql
     networks:
       - microbill-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
       interval: 10s
       timeout: 5s
       retries: 5
 
-  # PostgreSQL Database for Management Service
-  postgres-management:
-    image: postgres:16-alpine
-    container_name: microbill-postgres-management
+  # MySQL Database for Management Service
+  mysql-management:
+    image: mysql:8.0
+    container_name: microbill-mysql-management
     environment:
-      POSTGRES_DB: microbill_management
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_DATABASE: ${DB_NAME_MANAGEMENT}
     ports:
-      - "5433:5432"
+      - "${DB_PORT_MANAGEMENT}:3306"
     volumes:
-      - postgres-management-data:/var/lib/postgresql/data
+      - mysql-management-data:/var/lib/mysql
+      - ./database/init-databases.sql:/docker-entrypoint-initdb.d/init.sql
     networks:
       - microbill-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
       interval: 10s
       timeout: 5s
       retries: 5
 
-  # PostgreSQL Database for Billing Service
-  postgres-billing:
-    image: postgres:16-alpine
-    container_name: microbill-postgres-billing
+  # MySQL Database for Billing Service
+  mysql-billing:
+    image: mysql:8.0
+    container_name: microbill-mysql-billing
     environment:
-      POSTGRES_DB: microbill_billing
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_DATABASE: ${DB_NAME_BILLING}
     ports:
-      - "5434:5432"
+      - "${DB_PORT_BILLING}:3306"
     volumes:
-      - postgres-billing-data:/var/lib/postgresql/data
+      - mysql-billing-data:/var/lib/mysql
     networks:
       - microbill-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -87,17 +85,14 @@ services:
       context: ./microbill-authentication-service
       dockerfile: Dockerfile
     container_name: microbill-auth-service
+    env_file:
+      - .env
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-auth:5432/microbill_auth
-      SPRING_DATASOURCE_USERNAME: postgres
-      SPRING_DATASOURCE_PASSWORD: postgres
-      SPRING_JPA_HIBERNATE_DDL_AUTO: update
-      JWT_SECRET: microbill-secret-key-change-in-production-2024
-      JWT_EXPIRATION: 86400000
+      DB_HOST: mysql-auth
     ports:
-      - "8081:8081"
+      - "${AUTH_SERVICE_PORT}:8081"
     depends_on:
-      postgres-auth:
+      mysql-auth:
         condition: service_healthy
     networks:
       - microbill-network
@@ -109,15 +104,14 @@ services:
       context: ./microbill-management-service
       dockerfile: Dockerfile
     container_name: microbill-management-service
+    env_file:
+      - .env
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-management:5432/microbill_management
-      SPRING_DATASOURCE_USERNAME: postgres
-      SPRING_DATASOURCE_PASSWORD: postgres
-      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      DB_HOST: mysql-management
     ports:
-      - "8082:8082"
+      - "${MANAGEMENT_SERVICE_PORT}:8082"
     depends_on:
-      postgres-management:
+      mysql-management:
         condition: service_healthy
     networks:
       - microbill-network
@@ -129,20 +123,16 @@ services:
       context: ./microbill-billing-service
       dockerfile: Dockerfile
     container_name: microbill-billing-service
+    env_file:
+      - .env
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-billing:5432/microbill_billing
-      SPRING_DATASOURCE_USERNAME: postgres
-      SPRING_DATASOURCE_PASSWORD: postgres
-      SPRING_JPA_HIBERNATE_DDL_AUTO: update
-      SPRING_RABBITMQ_HOST: rabbitmq
-      SPRING_RABBITMQ_PORT: 5672
-      SPRING_RABBITMQ_USERNAME: admin
-      SPRING_RABBITMQ_PASSWORD: admin
+      DB_HOST: mysql-billing
+      RABBITMQ_HOST: rabbitmq
       AI_SERVICE_URL: http://ai-service:8084
     ports:
-      - "8083:8083"
+      - "${BILLING_SERVICE_PORT}:8083"
     depends_on:
-      postgres-billing:
+      mysql-billing:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
@@ -163,9 +153,9 @@ services:
     restart: unless-stopped
 
 volumes:
-  postgres-auth-data:
-  postgres-management-data:
-  postgres-billing-data:
+  mysql-auth-data:
+  mysql-management-data:
+  mysql-billing-data:
   rabbitmq-data:
 
 networks:

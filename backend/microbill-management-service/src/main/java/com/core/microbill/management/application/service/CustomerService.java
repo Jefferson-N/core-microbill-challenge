@@ -1,8 +1,8 @@
 package com.core.microbill.management.application.service;
 
 import com.core.microbill.management.domain.model.Customer;
-import com.core.microbill.management.domain.port.in.CustomerUseCase;
-import com.core.microbill.management.domain.port.out.CustomerRepository;
+import com.core.microbill.management.domain.port.in.CustomerInputPort;
+import com.core.microbill.management.domain.port.out.CustomerOutputPort;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -12,29 +12,29 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 @Transactional
-public class CustomerService implements CustomerUseCase {
+public class CustomerService implements CustomerInputPort {
     
-    private final CustomerRepository customerRepository;
+    private final CustomerOutputPort customerOutputPort;
 
     @Override
     public Customer create(Customer customer) {
-        if (customerRepository.existsByDocNumber(customer.getDocNumber())) {
+        if (customerOutputPort.existsByDocNumber(customer.getDocNumber())) {
             throw new RuntimeException("Customer with doc number already exists");
         }
-        return customerRepository.save(customer);
+        return customerOutputPort.save(customer);
     }
 
     @Override
     @Transactional(readOnly = true)
     public Customer findById(Long id) {
-        return customerRepository.findById(id)
+        return customerOutputPort.findById(id)
                 .orElseThrow(() -> new RuntimeException("Customer not found"));
     }
 
     @Override
     @Transactional(readOnly = true)
     public Page<Customer> findAll(Pageable pageable, String search) {
-        return customerRepository.findAll(pageable, search);
+        return customerOutputPort.findAll(pageable, search);
     }
 
     @Override
@@ -43,12 +43,12 @@ public class CustomerService implements CustomerUseCase {
         existing.setName(customer.getName());
         existing.setEmail(customer.getEmail());
         existing.setAddress(customer.getAddress());
-        return customerRepository.save(existing);
+        return customerOutputPort.save(existing);
     }
 
     @Override
     public void delete(Long id) {
         findById(id);
-        customerRepository.deleteById(id);
+        customerOutputPort.deleteById(id);
     }
 }
