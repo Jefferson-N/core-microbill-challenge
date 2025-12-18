@@ -1,0 +1,831 @@
+{
+	"info": {
+		"_postman_id": "microbill-api-collection",
+		"name": "Microbill API - Sistema de Facturación",
+		"description": "Colección completa para probar el sistema de facturación con microservicios, IA y mensajería",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{jwt_token}}",
+				"type": "string"
+			}
+		]
+	},
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost"
+		},
+		{
+			"key": "auth_port",
+			"value": "8079"
+		},
+		{
+			"key": "management_port",
+			"value": "8081"
+		},
+		{
+			"key": "billing_port",
+			"value": "8080"
+		},
+		{
+			"key": "ai_port",
+			"value": "8082"
+		},
+		{
+			"key": "jwt_token",
+			"value": ""
+		},
+		{
+			"key": "customer_id",
+			"value": ""
+		},
+		{
+			"key": "provider_id",
+			"value": ""
+		},
+		{
+			"key": "product_id",
+			"value": ""
+		},
+		{
+			"key": "invoice_id",
+			"value": ""
+		}
+	],
+	"item": [
+		{
+			"name": "🔐 Authentication Service",
+			"item": [
+				{
+					"name": "Login Admin",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    const response = pm.response.json();",
+									"    pm.collectionVariables.set('jwt_token', response.token);",
+									"    pm.test('Login successful', function () {",
+									"        pm.expect(response.token).to.not.be.empty;",
+									"    });",
+									"} else {",
+									"    pm.test('Login failed', function () {",
+									"        pm.expect.fail('Login should be successful');",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"admin@demo.com\",\n    \"password\": \"Admin#123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}:{{auth_port}}/api/auth/login",
+							"host": [
+								"{{base_url}}"
+							],
+							"port": "{{auth_port}}",
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
+						}
+					}
+				},
+				{
+					"name": "Login User",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"user@demo.com\",\n    \"password\": \"User#123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}:{{auth_port}}/api/auth/login",
+							"host": [
+								"{{base_url}}"
+							],
+							"port": "{{auth_port}}",
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "👥 Management Service - Customers",
+			"item": [
+				{
+					"name": "Get All Customers",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}:{{management_port}}/api/customers?page=0&size=10",
+							"host": [
+								"{{base_url}}"
+							],
+							"port": "{{management_port}}",
+							"path": [
+								"api",
+								"customers"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "10"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Create Customer",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    const response = pm.response.json();",
+									"    pm.collectionVariables.set('customer_id', response.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Juan Pérez\",\n    \"docNumber\": \"12345678\",\n    \"email\": \"juan.perez@email.com\",\n    \"address\": \"Calle 123, Ciudad\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}:{{management_port}}/api/customers",
+							"host": [
+								"{{base_url}}"
+							],
+							"port": "{{management_port}}",
+							"path": [
+								"api",
+								"customers"
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Customer by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}:{{management_port}}/api/customers/{{customer_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"port": "{{management_port}}",
+							"path": [
+								"api",
+								"customers",
+								"{{customer_id}}"
+							]
+						}
+					}
+				},
+				{
+					"name": "Update Customer",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Juan Pérez Actualizado\",\n    \"docNumber\": \"12345678\",\n    \"email\": \"juan.perez.updated@email.com\",\n    \"address\": \"Calle 456, Ciudad Nueva\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}:{{management_port}}/api/customers/{{customer_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"port": "{{management_port}}",
+							"path": [
+								"api",
+								"customers",
+								"{{customer_id}}"
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "🏢 Management Service - Providers",
+			"item": [
+				{
+					"name": "Get All Providers",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}:{{management_port}}/api/providers?page=0&size=10",
+							"host": [
+								"{{base_url}}"
+							],
+							"port": "{{management_port}}",
+							"path": [
+								"api",
+								"providers"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "10"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Create Provider",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    const response = pm.response.json();",
+									"    pm.collectionVariables.set('provider_id', response.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Proveedor Tech S.A.\",\n    \"taxId\": \"20123456789\",\n    \"email\": \"contacto@proveedortech.com\",\n    \"address\": \"Av. Tecnología 789, Lima\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}:{{management_port}}/api/providers",
+							"host": [
+								"{{base_url}}"
+							],
+							"port": "{{management_port}}",
+							"path": [
+								"api",
+								"providers"
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "📦 Management Service - Products",
+			"item": [
+				{
+					"name": "Get All Products",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}:{{management_port}}/api/products?page=0&size=10",
+							"host": [
+								"{{base_url}}"
+							],
+							"port": "{{management_port}}",
+							"path": [
+								"api",
+								"products"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "10"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Create Product",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    const response = pm.response.json();",
+									"    pm.collectionVariables.set('product_id', response.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"code\": \"LAPTOP001\",\n    \"name\": \"Laptop Dell Inspiron 15\",\n    \"price\": 1299.99,\n    \"taxRate\": 0.19,\n    \"stock\": 50\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}:{{management_port}}/api/products",
+							"host": [
+								"{{base_url}}"
+							],
+							"port": "{{management_port}}",
+							"path": [
+								"api",
+								"products"
+							]
+						}
+					}
+				},
+				{
+					"name": "Create Product - Mouse",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"code\": \"MOUSE001\",\n    \"name\": \"Mouse Inalámbrico Logitech\",\n    \"price\": 29.99,\n    \"taxRate\": 0.19,\n    \"stock\": 100\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}:{{management_port}}/api/products",
+							"host": [
+								"{{base_url}}"
+							],
+							"port": "{{management_port}}",
+							"path": [
+								"api",
+								"products"
+							]
+						}
+					}
+				},
+				{
+					"name": "Create Product - Keyboard",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"code\": \"KEYB001\",\n    \"name\": \"Teclado Mecánico RGB\",\n    \"price\": 89.99,\n    \"taxRate\": 0.19,\n    \"stock\": 75\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}:{{management_port}}/api/products",
+							"host": [
+								"{{base_url}}"
+							],
+							"port": "{{management_port}}",
+							"path": [
+								"api",
+								"products"
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "🧾 Billing Service - Invoices",
+			"item": [
+				{
+					"name": "Get All Invoices",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}:{{billing_port}}/api/invoices?page=0&size=10",
+							"host": [
+								"{{base_url}}"
+							],
+							"port": "{{billing_port}}",
+							"path": [
+								"api",
+								"invoices"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "10"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Create Invoice",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    const response = pm.response.json();",
+									"    pm.collectionVariables.set('invoice_id', response.id);",
+									"    pm.test('Invoice created successfully', function () {",
+									"        pm.expect(response.id).to.not.be.empty;",
+									"        pm.expect(response.total).to.be.above(0);",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"customerId\": {{customer_id}},\n    \"providerId\": {{provider_id}},\n    \"items\": [\n        {\n            \"productId\": {{product_id}},\n            \"quantity\": 2,\n            \"unitPrice\": 1299.99,\n            \"taxRate\": 0.19\n        },\n        {\n            \"productId\": {{product_id}},\n            \"quantity\": 1,\n            \"unitPrice\": 29.99,\n            \"taxRate\": 0.19\n        }\n    ]\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}:{{billing_port}}/api/invoices",
+							"host": [
+								"{{base_url}}"
+							],
+							"port": "{{billing_port}}",
+							"path": [
+								"api",
+								"invoices"
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Invoice by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}:{{billing_port}}/api/invoices/{{invoice_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"port": "{{billing_port}}",
+							"path": [
+								"api",
+								"invoices",
+								"{{invoice_id}}"
+							]
+						}
+					}
+				},
+				{
+					"name": "Generate Invoice PDF Report",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}:{{billing_port}}/api/invoices/{{invoice_id}}/generate-report",
+							"host": [
+								"{{base_url}}"
+							],
+							"port": "{{billing_port}}",
+							"path": [
+								"api",
+								"invoices",
+								"{{invoice_id}}",
+								"generate-report"
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "🤖 AI Service - Recommendations & Anomalies",
+			"item": [
+				{
+					"name": "Get Product Recommendations",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Recommendations received', function () {",
+									"    const response = pm.response.json();",
+									"    pm.expect(response.products).to.be.an('array');",
+									"    pm.expect(response.reason).to.not.be.empty;",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{}"
+						},
+						"url": {
+							"raw": "{{base_url}}:{{billing_port}}/api/ai/recommendations?customerId={{customer_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"port": "{{billing_port}}",
+							"path": [
+								"api",
+								"ai",
+								"recommendations"
+							],
+							"query": [
+								{
+									"key": "customerId",
+									"value": "{{customer_id}}"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Detect Anomalies",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Anomaly detection completed', function () {",
+									"    const response = pm.response.json();",
+									"    pm.expect(response.score).to.be.a('number');",
+									"    pm.expect(response.score).to.be.within(0, 1);",
+									"    pm.expect(response.explanation).to.not.be.empty;",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"customerId\": {{customer_id}},\n    \"total\": 2629.97,\n    \"items\": [\n        {\n            \"productId\": {{product_id}},\n            \"quantity\": 2,\n            \"unitPrice\": 1299.99,\n            \"taxRate\": 0.19\n        },\n        {\n            \"productId\": {{product_id}},\n            \"quantity\": 1,\n            \"unitPrice\": 29.99,\n            \"taxRate\": 0.19\n        }\n    ]\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}:{{billing_port}}/api/ai/anomaly-score",
+							"host": [
+								"{{base_url}}"
+							],
+							"port": "{{billing_port}}",
+							"path": [
+								"api",
+								"ai",
+								"anomaly-score"
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "🔍 Health Checks",
+			"item": [
+				{
+					"name": "Auth Service Health",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}:{{auth_port}}/actuator/health",
+							"host": [
+								"{{base_url}}"
+							],
+							"port": "{{auth_port}}",
+							"path": [
+								"actuator",
+								"health"
+							]
+						}
+					}
+				},
+				{
+					"name": "Management Service Health",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}:{{management_port}}/actuator/health",
+							"host": [
+								"{{base_url}}"
+							],
+							"port": "{{management_port}}",
+							"path": [
+								"actuator",
+								"health"
+							]
+						}
+					}
+				},
+				{
+					"name": "Billing Service Health",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}:{{billing_port}}/actuator/health",
+							"host": [
+								"{{base_url}}"
+							],
+							"port": "{{billing_port}}",
+							"path": [
+								"actuator",
+								"health"
+							]
+						}
+					}
+				},
+				{
+					"name": "AI Service Health",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}:{{ai_port}}/health",
+							"host": [
+								"{{base_url}}"
+							],
+							"port": "{{ai_port}}",
+							"path": [
+								"health"
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "📊 Swagger Documentation",
+			"item": [
+				{
+					"name": "Auth Service Swagger",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}:{{auth_port}}/swagger-ui.html",
+							"host": [
+								"{{base_url}}"
+							],
+							"port": "{{auth_port}}",
+							"path": [
+								"swagger-ui.html"
+							]
+						}
+					}
+				},
+				{
+					"name": "Management Service Swagger",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}:{{management_port}}/swagger-ui.html",
+							"host": [
+								"{{base_url}}"
+							],
+							"port": "{{management_port}}",
+							"path": [
+								"swagger-ui.html"
+							]
+						}
+					}
+				},
+				{
+					"name": "Billing Service Swagger",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}:{{billing_port}}/swagger-ui.html",
+							"host": [
+								"{{base_url}}"
+							],
+							"port": "{{billing_port}}",
+							"path": [
+								"swagger-ui.html"
+							]
+						}
+					}
+				},
+				{
+					"name": "AI Service OpenAPI Docs",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}:{{ai_port}}/docs",
+							"host": [
+								"{{base_url}}"
+							],
+							"port": "{{ai_port}}",
+							"path": [
+								"docs"
+							]
+						}
+					}
+				}
+			]
+		}
+	]
+}

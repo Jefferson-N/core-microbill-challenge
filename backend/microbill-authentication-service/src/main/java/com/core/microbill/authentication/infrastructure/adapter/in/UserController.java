@@ -1,9 +1,10 @@
 package com.core.microbill.authentication.infrastructure.adapter.in;
 
-import com.core.microbill.auth.api.UsersApi;
-import com.core.microbill.auth.api.model.*;
 import com.core.microbill.authentication.domain.model.User;
 import com.core.microbill.authentication.domain.port.in.UserInputPort;
+import com.core.microbill.authentication.infrastructure.adapter.in.api.UsersApi;
+import com.core.microbill.authentication.infrastructure.adapter.in.model.UserPageResponse;
+import com.core.microbill.authentication.infrastructure.adapter.in.model.UserResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;

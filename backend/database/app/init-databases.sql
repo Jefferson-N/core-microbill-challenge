@@ -1,10 +1,43 @@
--- Create databases
-CREATE DATABASE IF NOT EXISTS microbill_auth CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-CREATE DATABASE IF NOT EXISTS microbill_management CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-CREATE DATABASE IF NOT EXISTS microbill_billing CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE USER 'appuser'@'%' IDENTIFIED BY 'appsecret';
+GRANT ALL PRIVILEGES ON invoice_db.* TO 'appuser'@'%';
+FLUSH PRIVILEGES;
 
 -- Use management database
-USE microbill_management;
+use microbill_billing;
+
+CREATE TABLE IF NOT EXISTS users (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(100) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL,
+    email VARCHAR(255) NOT NULL UNIQUE,
+    enabled BOOLEAN NOT NULL DEFAULT TRUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_username (username),
+    INDEX idx_email (email)
+) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS roles (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(50) NOT NULL UNIQUE
+) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS user_roles (
+    user_id BIGINT NOT NULL,
+    role_id BIGINT NOT NULL,
+    PRIMARY KEY (user_id, role_id),
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (role_id) REFERENCES roles(id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+INSERT INTO roles (name) VALUES ('ADMIN'), ('USER');
+
+INSERT INTO users (username, password, email, enabled) VALUES
+('admin@demo.com', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'admin@demo.com', TRUE),
+('user@demo.com', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'user@demo.com', TRUE);
+
+INSERT INTO user_roles (user_id, role_id) VALUES (1, 1), (1, 2), (2, 2);
+
 
 -- Customers table
 CREATE TABLE IF NOT EXISTS customers (
@@ -62,3 +95,33 @@ INSERT INTO products (code, name, price, tax_rate, stock) VALUES
 ('KEYBOARD-001', 'Mechanical Keyboard RGB', 149.99, 0.19, 75),
 ('MONITOR-001', 'LG UltraWide 34"', 599.99, 0.19, 30),
 ('DOCK-001', 'USB-C Hub', 79.99, 0.19, 120);
+
+CREATE TABLE IF NOT EXISTS invoices (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    customer_id BIGINT NOT NULL,
+    provider_id BIGINT NOT NULL,
+    issue_date TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    subtotal DECIMAL(10, 2) NOT NULL,
+    tax_total DECIMAL(10, 2) NOT NULL,
+    total DECIMAL(10, 2) NOT NULL,
+    status VARCHAR(50) NOT NULL DEFAULT 'CREATED',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_customer_id (customer_id),
+    INDEX idx_provider_id (provider_id),
+    INDEX idx_status (status)
+) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS invoice_items (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    invoice_id BIGINT NOT NULL,
+    product_id BIGINT NOT NULL,
+    quantity INT NOT NULL,
+    unit_price DECIMAL(10, 2) NOT NULL,
+    tax_rate DECIMAL(5, 2) NOT NULL,
+    line_total DECIMAL(10, 2) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (invoice_id) REFERENCES invoices(id) ON DELETE CASCADE,
+    INDEX idx_invoice_id (invoice_id),
+    INDEX idx_product_id (product_id)
+) ENGINE=InnoDB;

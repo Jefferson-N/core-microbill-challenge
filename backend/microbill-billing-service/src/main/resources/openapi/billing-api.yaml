@@ -12,7 +12,7 @@ tags:
     description: Invoice management
 
 paths:
-  /invoices:
+  /api/invoices:
     get:
       tags:
         - Invoices
@@ -41,6 +41,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/InvoicePageResponse'
+        '403':
+          description: Access forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
     post:
       tags:
         - Invoices
@@ -59,8 +71,26 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/InvoiceResponse'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: Business logic error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
 
-  /invoices/{id}:
+  /api/invoices/{id}:
     get:
       tags:
         - Invoices
@@ -80,8 +110,24 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/InvoiceResponse'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
         '404':
           description: Invoice not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
     put:
       tags:
         - Invoices
@@ -107,6 +153,24 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/InvoiceResponse'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Invoice not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
     delete:
       tags:
         - Invoices
@@ -122,8 +186,26 @@ paths:
       responses:
         '204':
           description: Invoice deleted
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Invoice not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
 
-  /invoices/{id}/generate-report:
+  /api/invoices/{id}/generate-report:
     post:
       tags:
         - Invoices
@@ -144,6 +226,24 @@ paths:
               schema:
                 type: string
                 format: binary
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Invoice not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
 
 components:
   schemas:
@@ -253,3 +353,23 @@ components:
           type: integer
         number:
           type: integer
+
+    ErrorResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Error message
+        error:
+          type: string
+          description: Error type
+        status:
+          type: integer
+          description: HTTP status code
+        timestamp:
+          type: string
+          format: date-time
+          description: Error timestamp
+        path:
+          type: string
+          description: Request path

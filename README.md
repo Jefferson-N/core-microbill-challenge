@@ -2,6 +2,33 @@
 
 Sistema de facturación empresarial con **arquitectura de microservicios**, **IA integrada** y **frontend Angular moderno**.
 
+## 🚀 Inicio Rápido con Docker
+
+### Ejecución con un solo comando:
+
+**Windows:**
+```bash
+start.bat
+```
+
+**Linux/Mac:**
+```bash
+chmod +x start.sh
+./start.sh
+```
+
+### Configuración manual:
+```bash
+# 1. Copiar configuración
+cp .env.example .env
+
+# 2. Iniciar todos los servicios
+docker-compose up --build -d
+
+# 3. Verificar estado
+docker-compose ps
+```
+
 ## 🏗️ Arquitectura de Microservicios
 
 ### 🔹 Servicios Backend (Java 21 + Spring Boot 3)

@@ -1,35 +1,49 @@
-version: '3.8'
+version: "3.8"
 
 services:
+  # Database
   mysql:
-    image: mysql:8.0
-    container_name: microbill-mysql
+    image: mysql:9.4
+    container_name: mysql
     environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: microbill_db
-      MYSQL_USER: microbill_user
-      MYSQL_PASSWORD: microbill_pass
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-root}
+      MYSQL_DATABASE: ${DB_NAME:-microbill_billing}
+      MYSQL_USER: ${DB_USER:-appuser}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-microservices_db}
     ports:
-      - "3306:3306"
+      - "${DB_PORT:-3306}:3306"
     volumes:
-      - mysql_data:/var/lib/mysql
-      - ./backend/database/container-script/init.sql:/docker-entrypoint-initdb.d/01-init.sql
+      - mysql_db_data2:/var/lib/mysql
+      # - ./database/container-script/init.sql:/docker-entrypoint-initdb.d/01-init.sql
+      - ./database/app/data/init-databases.sql:/docker-entrypoint-initdb.d/02-data.sql
+      # - ./database/app/schema/init-auth.sql:/docker-entrypoint-initdb.d/03-schema.sql
+      # - ./database/app/data/init-billing.sql:/docker-entrypoint-initdb.d/04-data.sql
     networks:
       - microbill-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   rabbitmq:
-    image: rabbitmq:3-management-alpine
+    image: rabbitmq:3.13-management-alpine
     container_name: microbill-rabbitmq
     environment:
-      RABBITMQ_DEFAULT_USER: guest
-      RABBITMQ_DEFAULT_PASS: guest
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-admin}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS:-admin}
     ports:
-      - "5672:5672"
-      - "15672:15672"
+      - "${RABBITMQ_PORT:-5672}:5672"
+      - "${RABBITMQ_MANAGEMENT_PORT:-15672}:15672"
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
     networks:
       - microbill-network
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
 
   auth-service:
     build:
@@ -37,76 +51,109 @@ services:
       dockerfile: Dockerfile
     container_name: microbill-auth-service
     environment:
-      DB_URL: jdbc:mysql://mysql:3306/microbill_db
-      DB_USERNAME: microbill_user
-      DB_PASSWORD: microbill_pass
+      DB_HOST: mysql
+      DB_NAME: ${DB_NAME}
+      DB_PORT: ${DB_PORT}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRATION: ${JWT_EXPIRATION}
     ports:
-      - "8079:8079"
+      - "${AUTH_SERVICE_PORT:-8081}:8081"
     depends_on:
-      - mysql
+      mysql:
+        condition: service_healthy
     networks:
       - microbill-network
+    restart: unless-stopped
 
+  # Management Service
   management-service:
     build:
       context: ./backend/microbill-management-service
       dockerfile: Dockerfile
     container_name: microbill-management-service
     environment:
-      DB_URL: jdbc:mysql://mysql:3306/microbill_db
-      DB_USERNAME: microbill_user
-      DB_PASSWORD: microbill_pass
+      DB_HOST: mysql
+      DB_NAME: ${DB_NAME}
+      DB_PORT: ${DB_PORT}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
     ports:
-      - "8081:8081"
+      - "${MANAGEMENT_SERVICE_PORT:-8082}:8082"
     depends_on:
-      - mysql
+      mysql:
+        condition: service_healthy
     networks:
       - microbill-network
+    restart: unless-stopped
 
+  # Billing Service
   billing-service:
     build:
       context: ./backend/microbill-billing-service
       dockerfile: Dockerfile
     container_name: microbill-billing-service
     environment:
-      DB_URL: jdbc:mysql://mysql:3306/microbill_db
-      DB_USERNAME: microbill_user
-      DB_PASSWORD: microbill_pass
+      DB_HOST: mysql
+      DB_PORT: ${DB_PORT}
+      DB_NAME: ${DB_NAME}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
       RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
+      RABBITMQ_USER: ${RABBITMQ_USER}
+      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD}
+      AI_SERVICE_URL: http://ai-service:8082
     ports:
-      - "8080:8080"
+      - "${BILLING_SERVICE_PORT:-8083}:8083"
     depends_on:
-      - mysql
-      - rabbitmq
+      mysql:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
     networks:
       - microbill-network
+    restart: unless-stopped
 
+  # AI Service
   ai-service:
     build:
       context: ./backend/microbill-billing-ia
       dockerfile: Dockerfile
     container_name: microbill-ai-service
+    environment:
+      PORT: 8082
     ports:
-      - "8082:8082"
+      - "${AI_SERVICE_PORT:-8084}:8084"
     networks:
       - microbill-network
+    restart: unless-stopped
 
-  frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-    container_name: microbill-frontend
-    ports:
-      - "4200:80"
-    depends_on:
-      - auth-service
-      - management-service
-      - billing-service
-    networks:
-      - microbill-network
+  # Frontend
+  # frontend:
+  #   build:
+  #     context: ./frontend
+  #     dockerfile: Dockerfile
+  #   container_name: microbill-frontend
+  #   environment:
+  #     AUTH_SERVICE_URL: http://auth-service:8079/api
+  #     MANAGEMENT_SERVICE_URL: http://management-service:8081/api
+  #     BILLING_SERVICE_URL: http://billing-service:8080/api
+  #     AI_SERVICE_URL: http://ai-service:8082/api
+  #   ports:
+  #     - "${FRONTEND_PORT}:80"
+  #   depends_on:
+  #     - auth-service
+  #     - management-service
+  #     - billing-service
+  #     - ai-service
+  #   networks:
+  #     - microbill-network
+  #   restart: unless-stopped
 
 volumes:
-  mysql_data:
+  mysql_db_data2:
   rabbitmq_data:
 
 networks:

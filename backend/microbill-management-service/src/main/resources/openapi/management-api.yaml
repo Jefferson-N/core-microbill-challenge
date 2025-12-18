@@ -16,7 +16,7 @@ tags:
     description: Product management
 
 paths:
-  /customers:
+  /api/customers:
     get:
       tags:
         - Customers
@@ -44,6 +44,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CustomerPageResponse'
+        '403':
+          description: Access forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
     post:
       tags:
         - Customers
@@ -62,8 +74,26 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CustomerResponse'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: Business logic error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
 
-  /customers/{id}:
+  /api/customers/{id}:
     get:
       tags:
         - Customers
@@ -126,7 +156,7 @@ paths:
         '204':
           description: Customer deleted
 
-  /providers:
+  /api/providers:
     get:
       tags:
         - Providers
@@ -173,7 +203,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ProviderResponse'
 
-  /providers/{id}:
+  /api/providers/{id}:
     get:
       tags:
         - Providers
@@ -234,7 +264,7 @@ paths:
         '204':
           description: Provider deleted
 
-  /products:
+  /api/products:
     get:
       tags:
         - Products
@@ -281,7 +311,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ProductResponse'
 
-  /products/{id}:
+  /api/products/{id}:
     get:
       tags:
         - Products
@@ -499,3 +529,23 @@ components:
           type: integer
         number:
           type: integer
+
+    ErrorResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Error message
+        error:
+          type: string
+          description: Error type
+        status:
+          type: integer
+          description: HTTP status code
+        timestamp:
+          type: string
+          format: date-time
+          description: Error timestamp
+        path:
+          type: string
+          description: Request path

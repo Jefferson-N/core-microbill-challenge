@@ -1,5 +1,8 @@
 package com.core.microbill.billing.application.service;
 
+import com.core.microbill.billing.domain.exception.BusinessLogicException;
+import com.core.microbill.billing.domain.exception.ResourceNotFoundException;
+import com.core.microbill.billing.domain.exception.ValidationException;
 import com.core.microbill.billing.domain.model.Invoice;
 import com.core.microbill.billing.domain.model.InvoiceItem;
 import com.core.microbill.billing.domain.port.in.InvoiceInputPort;
@@ -24,6 +27,16 @@ public class InvoiceService implements InvoiceInputPort {
 
     @Override
     public Invoice create(Invoice invoice) {
+        if (invoice.getCustomerId() == null || invoice.getCustomerId() <= 0) {
+            throw new ValidationException("El ID del cliente es requerido y debe ser positivo");
+        }
+        if (invoice.getProviderId() == null || invoice.getProviderId() <= 0) {
+            throw new ValidationException("El ID del proveedor es requerido y debe ser positivo");
+        }
+        if (invoice.getItems() == null || invoice.getItems().isEmpty()) {
+            throw new ValidationException("La factura debe tener al menos un item");
+        }
+        
         calculateTotals(invoice);
         invoice.setIssueDate(LocalDateTime.now());
         invoice.setStatus("CREATED");
@@ -37,8 +50,11 @@ public class InvoiceService implements InvoiceInputPort {
     @Override
     @Transactional(readOnly = true)
     public Invoice findById(Long id) {
+        if (id == null || id <= 0) {
+            throw new ValidationException("El ID de la factura debe ser un número positivo");
+        }
         return invoiceOutputPort.findById(id)
-                .orElseThrow(() -> new RuntimeException("Invoice not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Factura con ID " + id + " no encontrada"));
     }
 
     @Override
@@ -75,6 +91,13 @@ public class InvoiceService implements InvoiceInputPort {
         BigDecimal taxTotal = BigDecimal.ZERO;
 
         for (InvoiceItem item : invoice.getItems()) {
+            if (item.getQuantity() <= 0) {
+                throw new ValidationException("La cantidad del item debe ser positiva");
+            }
+            if (item.getUnitPrice() == null || item.getUnitPrice().compareTo(BigDecimal.ZERO) < 0) {
+                throw new ValidationException("El precio unitario debe ser no negativo");
+            }
+            
             BigDecimal itemSubtotal = item.getUnitPrice()
                     .multiply(BigDecimal.valueOf(item.getQuantity()));
             BigDecimal itemTax = itemSubtotal.multiply(item.getTaxRate());

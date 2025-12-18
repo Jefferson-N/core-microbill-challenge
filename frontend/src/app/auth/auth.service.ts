@@ -69,10 +69,10 @@ export class AuthService {
     }
 
     private setCurrentUserFromResponse(response: LoginResponse): void {
-        const user: UserInfo = new UserInfo(
-            response.username,
-            response.roles
-        );
+        const user: UserInfo = {
+            username: response.username,
+            roles: response.roles
+        };
         this.currentUserSubject.next(user);
     }
 
