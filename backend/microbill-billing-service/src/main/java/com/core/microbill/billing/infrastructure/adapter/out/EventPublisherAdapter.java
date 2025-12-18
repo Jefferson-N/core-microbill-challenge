@@ -1,3 +1,4 @@
+/*
 package com.core.microbill.billing.infrastructure.adapter.out;
 
 import com.core.microbill.billing.domain.event.InvoiceCreatedEvent;
@@ -35,4 +36,4 @@ public class EventPublisherAdapter implements EventPublisherPort {
 
         eventPublisher.publishInvoiceCreated(event);
     }
-}
+}*/

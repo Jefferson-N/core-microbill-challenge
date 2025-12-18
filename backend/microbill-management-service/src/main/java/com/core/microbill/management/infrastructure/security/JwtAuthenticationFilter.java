@@ -1,11 +1,11 @@
 package com.core.microbill.management.infrastructure.security;
 
-import com.core.microbill.management.domain.exception.ValidationException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.Map;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
@@ -33,6 +34,17 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, 
                                   FilterChain filterChain) throws ServletException, IOException {
+        
+
+        String requestURI = request.getRequestURI();
+
+        if (requestURI.startsWith("/internal/") || 
+            requestURI.startsWith("/swagger-ui/") || 
+            requestURI.startsWith("/v3/api-docs") ||
+            requestURI.startsWith("/actuator/")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
         
         String authHeader = request.getHeader("Authorization");
         
@@ -60,11 +72,20 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                             new UsernamePasswordAuthenticationToken(username, null, Collections.emptyList());
                     SecurityContextHolder.getContext().setAuthentication(authentication);
                 }
+            } catch (org.springframework.web.client.HttpClientErrorException e) {
+                if (e.getStatusCode().value() == 401) {
+                    log.warn("Token validation failed - Unauthorized: ", e.getMessage());
+                } else {
+                    log.error("Token validation error: ", e.getMessage());
+                }
+            } catch (org.springframework.web.client.ResourceAccessException e) {
+                log.error("Auth service unavailable: ", e.getMessage());
             } catch (Exception e) {
-                logger.debug("Token validation failed: " + e.getMessage());
-                // No lanzar excepción, solo continuar sin autenticación
+                log.error("Unexpected error during token validation: ", e.getMessage(), e);
             }
         }
+
+        
         filterChain.doFilter(request, response);
     }
 }

@@ -91,9 +91,21 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
     }
 
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<ErrorResponse> handleRuntimeException(RuntimeException ex, WebRequest request) {
+        log.error("Runtime exception occurred: ", ex);
+        ErrorResponse error = new ErrorResponse()
+            .message("Error en tiempo de ejecución: " + ex.getMessage())
+            .error("Runtime Error")
+            .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
+            .timestamp(java.time.OffsetDateTime.now())
+            .path(request.getDescription(false).replace("uri=", ""));
+        return new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleGenericException(Exception ex, WebRequest request) {
-        log.error("handleGenericException ",ex);
+        log.error("Unhandled exception occurred: ", ex);
         ErrorResponse error = new ErrorResponse()
             .message("Error interno del servidor")
             .error("Internal Error")

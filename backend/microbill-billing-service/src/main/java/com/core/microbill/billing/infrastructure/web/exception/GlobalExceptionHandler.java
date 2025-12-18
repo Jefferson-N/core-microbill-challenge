@@ -76,6 +76,17 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
     }
 
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<ErrorResponse> handleRuntimeException(RuntimeException ex, WebRequest request) {
+        ErrorResponse error = new ErrorResponse()
+            .message("Error en tiempo de ejecución: " + ex.getMessage())
+            .error("Runtime Error")
+            .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
+            .timestamp(java.time.OffsetDateTime.now())
+            .path(request.getDescription(false).replace("uri=", ""));
+        return new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleGenericException(Exception ex, WebRequest request) {
         ErrorResponse error = new ErrorResponse()
