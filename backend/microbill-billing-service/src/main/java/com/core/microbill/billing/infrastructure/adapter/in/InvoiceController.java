@@ -8,6 +8,7 @@ import com.core.microbill.billing.domain.model.Invoice;
 import com.core.microbill.billing.domain.port.in.InvoiceInputPort;
 import com.core.microbill.billing.infrastructure.adapter.mapper.InvoiceResponseMapper;
 import com.core.microbill.billing.infrastructure.adapter.mapper.InvoiceRequestMapper;
+import com.core.microbill.billing.infrastructure.adapter.out.report.JasperReportService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
@@ -27,6 +28,7 @@ public class InvoiceController implements InvoicesApi {
     private final InvoiceInputPort invoiceInputPort;
     private final InvoiceResponseMapper invoiceResponseMapper;
     private final InvoiceRequestMapper invoiceRequestMapper;
+    private final JasperReportService jasperReportService;
 
     @Override
     public ResponseEntity<InvoiceResponse> createInvoice(InvoiceRequest request) {
@@ -74,7 +76,8 @@ public class InvoiceController implements InvoicesApi {
 
     @Override
     public ResponseEntity<Resource> generateInvoiceReport(Long id) {
-        byte[] pdf = invoiceInputPort.generateReport(id);
+        Invoice invoice = invoiceInputPort.findById(id);
+        byte[] pdf = jasperReportService.generateInvoiceReport(invoice);
 
         Resource resource = new ByteArrayResource(pdf);
 
