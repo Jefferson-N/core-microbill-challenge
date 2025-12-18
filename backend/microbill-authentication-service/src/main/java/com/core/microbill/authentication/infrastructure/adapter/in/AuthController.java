@@ -21,21 +21,20 @@ public class AuthController implements AuthApi {
 
     @Override
     public ResponseEntity<LoginResponse> login(LoginRequest request) {
-        try {
-            String token = authInputPort.login(request.getUsername(), request.getPassword());
-            
-            java.util.List<String> roles = tokenValidationInputPort.getRolesFromToken(token);
-            
-            LoginResponse response = new LoginResponse();
-            response.setToken(token);
-            response.setType("Bearer");
-            response.setUsername(request.getUsername());
-            response.setRoles(roles);
+        String username = request.getUsername() != null ? request.getUsername().trim() : "";
+        String password = request.getPassword() != null ? request.getPassword().trim() : "";
+        
+        String token = authInputPort.login(username, password);
+        
+        java.util.List<String> roles = tokenValidationInputPort.getRolesFromToken(token);
+        
+        LoginResponse response = new LoginResponse();
+        response.setToken(token);
+        response.setType("Bearer");
+        response.setUsername(username);
+        response.setRoles(roles);
 
-            return ResponseEntity.ok(response);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
+        return ResponseEntity.ok(response);
     }
 
     @Override

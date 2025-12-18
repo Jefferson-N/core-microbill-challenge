@@ -15,24 +15,38 @@
 
     <button pButton type="submit" label="Login" icon="pi pi-sign-in" [disabled]="!loginForm.valid"></button>
 
-    <button pButton type="button" label="Registrarse" icon="pi pi-user-plus" class="p-button-secondary p-ml-2"
+    <button pButton type="button" label="Usuarios Demo" icon="pi pi-info-circle" class="p-button-help p-ml-2"
             (click)="registerDialogVisible = true"></button>
   </form>
 </div>
 
-<!-- Modal de registro -->
-<p-dialog header="Registro de Usuario" [(visible)]="registerDialogVisible" [modal]="true" [closable]="true" [style]="{width: '400px'}">
-  <form (ngSubmit)="onRegister()" #registerForm="ngForm">
-    <div class="p-field">
-      <label for="regUsername"><i class="pi pi-user"></i> Username</label>
-      <input id="regUsername" type="text" pInputText [(ngModel)]="regUsername" name="regUsername" required />
+<!-- Modal de usuarios demo -->
+<p-dialog header="Usuarios Demo" [(visible)]="registerDialogVisible" [modal]="true" [closable]="true" [style]="{width: '500px'}">
+  <div class="demo-users">
+    <h4><i class="pi pi-users"></i> Credenciales de Prueba</h4>
+    
+    <div class="user-card">
+      <h5><i class="pi pi-user-edit"></i> Administrador</h5>
+      <p><strong>Usuario:</strong> admin@demo.com</p>
+      <p><strong>Contraseña:</strong> Admin#123</p>
+      <p><strong>Roles:</strong> ADMIN, USER</p>
     </div>
-
-    <div class="p-field">
-      <label for="regPassword"><i class="pi pi-key"></i> Password</label>
-      <p-password [(ngModel)]="regPassword" name="regPassword" placeholder="Ingrese su contraseña" required></p-password>
+    
+    <div class="user-card">
+      <h5><i class="pi pi-user"></i> Usuario Regular</h5>
+      <p><strong>Usuario:</strong> user@demo.com</p>
+      <p><strong>Contraseña:</strong> User#123</p>
+      <p><strong>Roles:</strong> USER</p>
     </div>
-
-    <button pButton type="submit" label="Registrar" icon="pi pi-check" [disabled]="!registerForm.valid"></button>
-  </form>
+    
+    <div class="info-note">
+      <i class="pi pi-info-circle"></i>
+      <span>Copie y pegue las credenciales en el formulario de login</span>
+    </div>
+  </div>
+  
+  <div class="dialog-footer">
+    <button pButton type="button" label="Cerrar" icon="pi pi-times" 
+            (click)="registerDialogVisible = false"></button>
+  </div>
 </p-dialog>

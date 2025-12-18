@@ -5,7 +5,13 @@ info:
   version: 1.0.0
 servers:
   - url: http://localhost:8081/api
-    description: Local server
+    description: Auth Service
+  - url: http://localhost:8082/api
+    description: Management Service
+  - url: http://localhost:8083/api
+    description: Billing Service
+  - url: http://localhost:8084/api
+    description: AI Service
 
 tags:
   - name: Auth
@@ -204,7 +210,198 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
+  # Management Service Endpoints
+  /customers:
+    get:
+      tags:
+        - Customers
+      summary: Get all customers
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 0
+        - name: size
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: Customers retrieved successfully
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+    post:
+      tags:
+        - Customers
+      summary: Create customer
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CustomerRequest'
+      responses:
+        '201':
+          description: Customer created
+        '401':
+          description: Unauthorized
+
+  /providers:
+    get:
+      tags:
+        - Providers
+      summary: Get all providers
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Providers retrieved successfully
+        '401':
+          description: Unauthorized
+    post:
+      tags:
+        - Providers
+      summary: Create provider
+      security:
+        - BearerAuth: []
+      responses:
+        '201':
+          description: Provider created
+        '401':
+          description: Unauthorized
+
+  /products:
+    get:
+      tags:
+        - Products
+      summary: Get all products
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Products retrieved successfully
+        '401':
+          description: Unauthorized
+    post:
+      tags:
+        - Products
+      summary: Create product
+      security:
+        - BearerAuth: []
+      responses:
+        '201':
+          description: Product created
+        '401':
+          description: Unauthorized
+
+  # Billing Service Endpoints
+  /invoices:
+    get:
+      tags:
+        - Invoices
+      summary: Get all invoices
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Invoices retrieved successfully
+        '401':
+          description: Unauthorized
+    post:
+      tags:
+        - Invoices
+      summary: Create invoice
+      security:
+        - BearerAuth: []
+      responses:
+        '201':
+          description: Invoice created
+        '401':
+          description: Unauthorized
+
+  /invoices/{id}/generate-report:
+    post:
+      tags:
+        - Invoices
+      summary: Generate invoice PDF report
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: PDF generated successfully
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+        '401':
+          description: Unauthorized
+        '404':
+          description: Invoice not found
+
+  # AI Service Endpoints
+  /ai/recommendations:
+    post:
+      tags:
+        - AI
+      summary: Get product recommendations
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: customerId
+          in: query
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Recommendations retrieved successfully
+        '401':
+          description: Unauthorized
+
+  /ai/anomaly-score:
+    post:
+      tags:
+        - AI
+      summary: Detect anomalies in invoice
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AnomalyRequest'
+      responses:
+        '200':
+          description: Anomaly detection completed
+        '401':
+          description: Unauthorized
+
 components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT token for authentication
+  
   schemas:
     LoginRequest:
       type: object
@@ -325,3 +522,38 @@ components:
         username:
           type: string
           description: Username extracted from token
+
+    CustomerRequest:
+      type: object
+      required:
+        - name
+        - docNumber
+        - email
+      properties:
+        name:
+          type: string
+        docNumber:
+          type: string
+        email:
+          type: string
+          format: email
+        address:
+          type: string
+
+    AnomalyRequest:
+      type: object
+      required:
+        - customerId
+        - total
+        - items
+      properties:
+        customerId:
+          type: integer
+          format: int64
+        total:
+          type: number
+          format: double
+        items:
+          type: array
+          items:
+            type: object

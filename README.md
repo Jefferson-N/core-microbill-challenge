@@ -32,10 +32,10 @@ docker-compose ps
 ## 🏗️ Arquitectura de Microservicios
 
 ### 🔹 Servicios Backend (Java 21 + Spring Boot 3)
-- **🔐 Auth Service** (8079): Autenticación JWT, usuarios, roles
-- **📊 Management Service** (8081): CRUD Customers, Providers, Products  
-- **🧾 Billing Service** (8080): Facturas, items, reportes PDF, eventos
-- **🤖 AI Service** (8082): Python + FastAPI - Recomendaciones y detección de anomalías
+- **🔐 Auth Service** (8081): Autenticación JWT, usuarios, roles
+- **📊 Management Service** (8082): CRUD Customers, Providers, Products  
+- **🧾 Billing Service** (8083): Facturas, items, reportes PDF, eventos
+- **🤖 AI Service** (8084): Python + FastAPI - Recomendaciones y detección de anomalías
 
 ### 🔹 Frontend (Angular 21 + PrimeNG)
 - **🎨 Frontend** (4200): SPA con lazy loading, guards, interceptors
@@ -120,10 +120,10 @@ npm start
 | Servicio | URL | Descripción |
 |----------|-----|-------------|
 | **Frontend** | http://localhost:4200 | Aplicación Angular |
-| **Auth API** | http://localhost:8079/swagger-ui.html | Autenticación |
-| **Management API** | http://localhost:8081/swagger-ui.html | Gestión CRUD |
-| **Billing API** | http://localhost:8080/swagger-ui.html | Facturación |
-| **AI API** | http://localhost:8082/docs | Inteligencia Artificial |
+| **Auth API** | http://localhost:8081/swagger-ui.html | Autenticación |
+| **Management API** | http://localhost:8082/swagger-ui.html | Gestión CRUD |
+| **Billing API** | http://localhost:8083/swagger-ui.html | Facturación |
+| **AI API** | http://localhost:8084/docs | Inteligencia Artificial |
 | **RabbitMQ** | http://localhost:15672 | Management UI |
 
 ## 📋 **Endpoints Principales**

@@ -50,12 +50,12 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(error, HttpStatus.UNAUTHORIZED);
     }
 
-    @ExceptionHandler( BadCredentialsException.class)
+    @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<ErrorResponse> handleCredentialsException(BadCredentialsException ex, WebRequest request) {
         ErrorResponse error = new ErrorResponse()
-                .message(ex.getMessage())
-                .error("Credenciales invalidas")
-                .status(HttpStatus.CONFLICT.value())
+                .message("Credenciales inválidas")
+                .error("Authentication Failed")
+                .status(HttpStatus.UNAUTHORIZED.value())
                 .timestamp(java.time.OffsetDateTime.now())
                 .path(request.getDescription(false).replace("uri=", ""));
         return new ResponseEntity<>(error, HttpStatus.UNAUTHORIZED);

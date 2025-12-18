@@ -13,7 +13,6 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -25,8 +24,20 @@ import java.util.List;
 public class SecurityConfig {
 
 
-    @Value("${app.cors.allowed-origins}")
+    @Value("${cors.allowed-origins}")
     private String[] allowedOrigins;
+    
+    @Value("${cors.allowed-methods}")
+    private String[] allowedMethods;
+    
+    @Value("${cors.allowed-headers}")
+    private String[] allowedHeaders;
+    
+    @Value("${cors.allow-credentials}")
+    private boolean allowCredentials;
+    
+    @Value("${security.public-endpoints}")
+    private String[] publicEndpoints;
 
 
     @Bean
@@ -36,7 +47,8 @@ public class SecurityConfig {
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .anyRequest().permitAll()
+                        .requestMatchers(publicEndpoints).permitAll()
+                        .anyRequest().authenticated()
                 );
         return http.build();
     }
@@ -44,10 +56,11 @@ public class SecurityConfig {
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of(allowedOrigins));
-        configuration.addAllowedMethod("*");
-        configuration.addAllowedHeader("*");
-        configuration.setAllowCredentials(true);
+        configuration.setAllowedOriginPatterns(List.of(allowedOrigins));
+        configuration.setAllowedMethods(List.of(allowedMethods));
+        configuration.setAllowedHeaders(List.of(allowedHeaders));
+        configuration.setAllowCredentials(allowCredentials);
+        configuration.setExposedHeaders(List.of("Authorization"));
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
@@ -62,13 +75,15 @@ public class SecurityConfig {
     @Bean
     public DaoAuthenticationProvider authenticationProvider(CustomUserDetailsService userDetailsService,
                                                             PasswordEncoder passwordEncoder) {
-        DaoAuthenticationProvider provider = new DaoAuthenticationProvider(userDetailsService);
+        DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
+        provider.setUserDetailsService(userDetailsService);
         provider.setPasswordEncoder(passwordEncoder);
         return provider;
     }
 
     @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration config,
+                                                       DaoAuthenticationProvider authenticationProvider) throws Exception {
         return config.getAuthenticationManager();
     }
 

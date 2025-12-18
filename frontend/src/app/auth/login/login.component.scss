@@ -33,3 +33,55 @@
     width: 100%;
   }
 }
+
+.demo-users {
+  .user-card {
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 6px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    
+    h5 {
+      margin: 0 0 0.5rem 0;
+      color: #495057;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    p {
+      margin: 0.25rem 0;
+      font-size: 0.9rem;
+      
+      strong {
+        color: #212529;
+      }
+    }
+  }
+  
+  .info-note {
+    background: #e3f2fd;
+    border: 1px solid #bbdefb;
+    border-radius: 4px;
+    padding: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+    color: #1976d2;
+    
+    i {
+      color: #1976d2;
+    }
+  }
+}
+
+.dialog-footer {
+  text-align: right;
+  margin-top: 1rem;
+  
+  button {
+    width: auto;
+  }
+}

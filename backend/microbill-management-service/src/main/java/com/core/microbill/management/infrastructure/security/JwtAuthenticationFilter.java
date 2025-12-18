@@ -38,7 +38,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             try {
-                String token = authHeader.substring(7); // Remove "Bearer " prefix
+                String token = authHeader.substring(7);
                 
                 HttpHeaders headers = new HttpHeaders();
                 headers.set("Content-Type", "application/json");

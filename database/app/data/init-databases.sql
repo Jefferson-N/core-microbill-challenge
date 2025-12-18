@@ -1,9 +1,5 @@
-CREATE USER 'microbill_user'@'%' IDENTIFIED BY 'tu_password';
-GRANT ALL PRIVILEGES ON microservices_db.* TO 'microbill_user'@'%';
-FLUSH PRIVILEGES;
-
 -- Use management database
-use microbill_billing;
+USE microbill_billing;
 
 CREATE TABLE IF NOT EXISTS users (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
@@ -30,13 +26,23 @@ CREATE TABLE IF NOT EXISTS user_roles (
     FOREIGN KEY (role_id) REFERENCES roles(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
-INSERT INTO roles (name) VALUES ('ADMIN'), ('USER');
+INSERT IGNORE INTO roles (name) VALUES ('ADMIN'), ('USER');
 
-INSERT INTO users (username, password, email, enabled) VALUES
-('admin@demo.com', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'admin@demo.com', TRUE),
-('user@demo.com', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'user@demo.com', TRUE);
+INSERT IGNORE INTO users (username, password, email, enabled) VALUES 
+('admin@demo.com', '$2a$10$8K1p/wf4C2ki65fUFyOuAuIiQOpPgH4ALg532E/M4w4ZMZbfmub4O', 'admin@demo.com', 1),
+('user@demo.com', '$2a$10$8K1p/wf4C2ki65fUFyOuAuIiQOpPgH4ALg532E/M4w4ZMZbfmub4O', 'user@demo.com', 1);
 
-INSERT INTO user_roles (user_id, role_id) VALUES (1, 1), (1, 2), (2, 2);
+INSERT IGNORE INTO user_roles (user_id, role_id) 
+SELECT u.id, r.id FROM users u, roles r 
+WHERE u.username = 'admin@demo.com' AND r.name = 'ADMIN';
+
+INSERT IGNORE INTO user_roles (user_id, role_id) 
+SELECT u.id, r.id FROM users u, roles r 
+WHERE u.username = 'admin@demo.com' AND r.name = 'USER';
+
+INSERT IGNORE INTO user_roles (user_id, role_id) 
+SELECT u.id, r.id FROM users u, roles r 
+WHERE u.username = 'user@demo.com' AND r.name = 'USER';
 
 
 -- Customers table
@@ -80,16 +86,16 @@ CREATE TABLE IF NOT EXISTS products (
 ) ENGINE=InnoDB;
 
 -- Insert sample data
-INSERT INTO customers (name, doc_number, email, address) VALUES
+INSERT IGNORE INTO customers (name, doc_number, email, address) VALUES
 ('Acme Corporation', '123456789', 'contact@acme.com', '123 Main St, New York, NY 10001'),
 ('Tech Solutions LLC', '987654321', 'info@techsolutions.com', '456 Tech Ave, San Francisco, CA 94102'),
 ('Global Enterprises', '555123456', 'sales@globalent.com', '789 Business Blvd, Austin, TX 78701');
 
-INSERT INTO providers (name, tax_id, email, address) VALUES
+INSERT IGNORE INTO providers (name, tax_id, email, address) VALUES
 ('Tech Supplies Inc.', 'TAX-111222333', 'sales@techsupplies.com', '100 Supply St, Seattle, WA 98101'),
 ('Global Distributors', 'TAX-444555666', 'contact@globaldist.com', '200 Commerce Dr, Chicago, IL 60601');
 
-INSERT INTO products (code, name, price, tax_rate, stock) VALUES
+INSERT IGNORE INTO products (code, name, price, tax_rate, stock) VALUES
 ('LAPTOP-001', 'Dell XPS 15', 1500.00, 0.19, 50),
 ('MOUSE-001', 'Logitech MX Master 3', 99.99, 0.19, 100),
 ('KEYBOARD-001', 'Mechanical Keyboard RGB', 149.99, 0.19, 75),

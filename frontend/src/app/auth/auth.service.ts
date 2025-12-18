@@ -58,9 +58,19 @@ export class AuthService {
     private setCurrentUserFromToken(token: string): void {
         try {
             const payload = JSON.parse(atob(token.split('.')[1]));
+            let roles: string[] = [];
+            
+            if (payload.roles) {
+                if (typeof payload.roles === 'string') {
+                    roles = payload.roles.split(',').map((role: string) => role.trim());
+                } else if (Array.isArray(payload.roles)) {
+                    roles = payload.roles;
+                }
+            }
+            
             const user: UserInfo = {
                 username: payload.sub,
-                roles: payload.roles || []
+                roles: roles
             };
             this.currentUserSubject.next(user);
         } catch (error) {

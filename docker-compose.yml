@@ -6,18 +6,16 @@ services:
     image: mysql:9.4
     container_name: mysql
     environment:
-      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-root}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-root123}
       MYSQL_DATABASE: ${DB_NAME:-microbill_billing}
       MYSQL_USER: ${DB_USER:-appuser}
-      MYSQL_PASSWORD: ${DB_PASSWORD:-microservices_db}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-appuser123}
     ports:
       - "${DB_PORT:-3306}:3306"
     volumes:
-      - mysql_db_data2:/var/lib/mysql
-      # - ./database/container-script/init.sql:/docker-entrypoint-initdb.d/01-init.sql
+      - mysql_db_data6:/var/lib/mysql
+      - ./backend/database/container-script/init.sql:/docker-entrypoint-initdb.d/01-init.sql
       - ./database/app/data/init-databases.sql:/docker-entrypoint-initdb.d/02-data.sql
-      # - ./database/app/schema/init-auth.sql:/docker-entrypoint-initdb.d/03-schema.sql
-      # - ./database/app/data/init-billing.sql:/docker-entrypoint-initdb.d/04-data.sql
     networks:
       - microbill-network
     healthcheck:
@@ -31,7 +29,7 @@ services:
     container_name: microbill-rabbitmq
     environment:
       RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-admin}
-      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS:-admin}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-admin123}
     ports:
       - "${RABBITMQ_PORT:-5672}:5672"
       - "${RABBITMQ_MANAGEMENT_PORT:-15672}:15672"
@@ -104,7 +102,7 @@ services:
       RABBITMQ_PORT: 5672
       RABBITMQ_USER: ${RABBITMQ_USER}
       RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD}
-      AI_SERVICE_URL: http://ai-service:8082
+      AI_SERVICE_URL: http://ai-service:8084
     ports:
       - "${BILLING_SERVICE_PORT:-8083}:8083"
     depends_on:
@@ -123,7 +121,7 @@ services:
       dockerfile: Dockerfile
     container_name: microbill-ai-service
     environment:
-      PORT: 8082
+      PORT: 8084
     ports:
       - "${AI_SERVICE_PORT:-8084}:8084"
     networks:
@@ -153,7 +151,7 @@ services:
   #   restart: unless-stopped
 
 volumes:
-  mysql_db_data2:
+  mysql_db_data6:
   rabbitmq_data:
 
 networks:

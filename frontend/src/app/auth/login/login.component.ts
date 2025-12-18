@@ -9,6 +9,7 @@ import { AuthService } from '../auth.service';
 import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
 import { DialogModule } from 'primeng/dialog';
+import { ErrorResponse } from '../../shared/models/error-response';
 
 @Component({
   selector: 'app-login',
@@ -55,22 +56,25 @@ export class LoginComponent {
         },
         error: (err) => {
           console.error('Error en login:', err);
+          const errorResponse: ErrorResponse = err.error;
+          let errorMessage = 'Usuario o contraseña incorrectos';
+          let errorSummary = 'Error de login';
+          
+          if (errorResponse) {
+            errorMessage = errorResponse.message || errorMessage;
+            errorSummary = errorResponse.error || errorSummary;
+          }
+          
           this.messageService.add({
             severity: 'error',
-            summary: 'Error de login',
-            detail: 'Usuario o contraseña incorrectos'
+            summary: errorSummary,
+            detail: errorMessage
           });
         }
       });
   }
 
   onRegister(): void {
-    // Registro deshabilitado - usar usuarios demo
-    this.messageService.add({
-      severity: 'info',
-      summary: 'Información',
-      detail: 'Use usuarios demo: admin@demo.com/Admin#123 o user@demo.com/User#123'
-    });
     this.registerDialogVisible = false;
   }
 }
