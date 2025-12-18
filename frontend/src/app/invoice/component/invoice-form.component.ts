@@ -231,6 +231,19 @@ export class InvoiceFormComponent implements OnInit {
     }
   }
 
+  isFormValid(): boolean {
+    const hasCustomer = !!this.invoiceForm.get('customerId')?.value;
+    const hasProvider = !!this.invoiceForm.get('providerId')?.value;
+    const hasItems = this.itemsFormArray.length > 0;
+    const itemsValid = this.itemsFormArray.controls.every(control => 
+      control.get('productId')?.value && 
+      control.get('quantity')?.value > 0 && 
+      control.get('unitPrice')?.value >= 0
+    );
+    
+    return hasCustomer && hasProvider && hasItems && itemsValid;
+  }
+
   resetForm(): void {
     this.invoiceForm.reset();
     this.itemsFormArray.clear();

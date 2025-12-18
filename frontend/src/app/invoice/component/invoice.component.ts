@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { TableModule } from 'primeng/table';
@@ -27,7 +27,8 @@ export class InvoiceComponent implements OnInit {
 
   constructor(
     private billingService: BillingService,
-    private messageService: MessageService
+    private messageService: MessageService,
+    private cdr: ChangeDetectorRef
   ) { }
 
   ngOnInit(): void {
@@ -36,14 +37,22 @@ export class InvoiceComponent implements OnInit {
 
   loadInvoices(): void {
     this.loading = true;
+    this.cdr.detectChanges();
+    
     this.billingService.getInvoices(0, 20).subscribe({
       next: (response) => {
         this.invoices = response.content;
-        this.loading = false;
+        setTimeout(() => {
+          this.loading = false;
+          this.cdr.detectChanges();
+        });
       },
       error: (err) => {
         console.error('Error loading invoices:', err);
-        this.loading = false;
+        setTimeout(() => {
+          this.loading = false;
+          this.cdr.detectChanges();
+        });
         this.messageService.add({
           severity: 'error',
           summary: 'Error',
