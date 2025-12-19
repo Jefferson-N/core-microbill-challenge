@@ -120,9 +120,9 @@ npm start
 | Service | URL | Description |
 |---------|-----|-------------|
 | **Frontend** | http://localhost:4200 | Angular Application |
-| **Auth API** | http://localhost:8081swagger-ui/index.html | Authentication |
-| **Management API** | http://localhost:8082swagger-ui/index.html | CRUD Management |
-| **Billing API** | http://localhost:8083swagger-ui/index.html | Billing |
+| **Auth API** | http://localhost:8081/swagger-ui/index.html | Authentication |
+| **Management API** | http://localhost:8082/swagger-ui/index.html | CRUD Management |
+| **Billing API** | http://localhost:8083/swagger-ui/index.html | Billing |
 | **AI API** | http://localhost:8084/docs | Artificial Intelligence |
 | **RabbitMQ** | http://localhost:15672 | Management UI |
 
