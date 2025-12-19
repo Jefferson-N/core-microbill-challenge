@@ -68,7 +68,7 @@ export class SuppliersComponent implements OnInit {
         this.messageService.add({
           severity: 'error',
           summary: 'Error',
-          detail: 'No se pudieron cargar los proveedores'
+          detail: err.error?.message || 'Could not load providers'
         });
       }
     });
@@ -115,7 +115,7 @@ export class SuppliersComponent implements OnInit {
             this.messageService.add({
               severity: 'error',
               summary: 'Error',
-              detail: 'No se pudo eliminar el proveedor'
+              detail: err.error?.message || 'Could not delete provider'
             });
           }
         });
@@ -148,7 +148,7 @@ export class SuppliersComponent implements OnInit {
             this.messageService.add({
               severity: 'error',
               summary: 'Error',
-              detail: 'No se pudo actualizar el proveedor'
+              detail: err.error?.message || 'Could not update provider'
             });
           }
         });
@@ -168,7 +168,7 @@ export class SuppliersComponent implements OnInit {
             this.messageService.add({
               severity: 'error',
               summary: 'Error',
-              detail: 'No se pudo crear el proveedor'
+              detail: err.error?.message || 'Could not create provider'
             });
           }
         });

@@ -35,6 +35,7 @@ export class AuthService {
 
     logout(): void {
         localStorage.removeItem('token');
+        localStorage.clear();
         this.currentUserSubject.next(null);
     }
 
@@ -48,7 +49,12 @@ export class AuthService {
 
     isAuthenticated(): boolean {
         const token = this.getToken();
-        return !!token && !this.isTokenExpired(token);
+        if (!token) return false;
+        if (this.isTokenExpired(token)) {
+            this.logout();
+            return false;
+        }
+        return true;
     }
 
     getCurrentUser(): UserInfo | null {

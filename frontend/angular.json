@@ -6,7 +6,7 @@
   },
   "newProjectRoot": "projects",
   "projects": {
-    "ch-invoice-app": {
+    "microbill-frontend": {
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {
@@ -59,8 +59,7 @@
               "outputHashing": "all",
               "sourceMap": false,
               "namedChunks": false,
-              "extractLicenses": true,
-              "vendorChunk": false
+              "extractLicenses": true
             },
             "development": {
               "optimization": false,
@@ -79,10 +78,10 @@
           },
           "configurations": {
             "production": {
-              "buildTarget": "ch-invoice-app:build:production"
+              "buildTarget": "microbill-frontend:build:production"
             },
             "development": {
-              "buildTarget": "ch-invoice-app:build:development"
+              "buildTarget": "microbill-frontend:build:development"
             }
           },
           "defaultConfiguration": "development"

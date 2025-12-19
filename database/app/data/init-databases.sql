@@ -28,9 +28,12 @@ CREATE TABLE IF NOT EXISTS user_roles (
 
 INSERT IGNORE INTO roles (name) VALUES ('ADMIN'), ('USER');
 
-INSERT IGNORE INTO users (username, password, email, enabled) VALUES 
-('admin@demo.com', '$2a$10$8K1p/wf4C2ki65fUFyOuAuIiQOpPgH4ALg532E/M4w4ZMZbfmub4O', 'admin@demo.com', 1),
-('user@demo.com', '$2a$10$8K1p/wf4C2ki65fUFyOuAuIiQOpPgH4ALg532E/M4w4ZMZbfmub4O', 'user@demo.com', 1);
+INSERT INTO microbill_billing.users
+(id, username, password, email, enabled, created_at, updated_at)
+VALUES(3, 'admin@demo.com', '$2a$10$QUhDJPw.x2peB275e/DL2OU7VOu968YbxRm8fqDpX9UzELWENrY0a', 'admin@demo.com', 1, '2025-12-19 07:07:04', '2025-12-19 07:07:04');
+INSERT INTO microbill_billing.users
+(id, username, password, email, enabled, created_at, updated_at)
+VALUES(4, 'user@demo.com', '$2a$10$ux8nd5cjHTfLyORRCstvy.heKFpIlY7CgX3SboYpZITXHGs7.6r8e', 'user@demo.com', 1, '2025-12-19 07:08:52', '2025-12-19 07:08:52');
 
 INSERT IGNORE INTO user_roles (user_id, role_id) 
 SELECT u.id, r.id FROM users u, roles r 

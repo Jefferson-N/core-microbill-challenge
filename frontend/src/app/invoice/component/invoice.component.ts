@@ -6,6 +6,9 @@ import { ButtonModule } from 'primeng/button';
 import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
 import { BillingService, Invoice } from '../../core/services/billing.service';
+import { ManagementService, Customer, Provider } from '../../core/services/management.service';
+import { Router } from '@angular/router';
+import { AuthService } from '../../auth/auth.service';
 
 @Component({
   selector: 'app-invoice',
@@ -23,16 +26,67 @@ import { BillingService, Invoice } from '../../core/services/billing.service';
 })
 export class InvoiceComponent implements OnInit {
   invoices: Invoice[] = [];
+  customers: Customer[] = [];
+  providers: Provider[] = [];
   loading = false;
+
 
   constructor(
     private billingService: BillingService,
+    private managementService: ManagementService,
+    private authService: AuthService,
     private messageService: MessageService,
+    private router: Router,
     private cdr: ChangeDetectorRef
   ) { }
 
   ngOnInit(): void {
+    if (!this.authService.isAuthenticated()) {
+      this.authService.logout();
+      this.router.navigate(['/login']);
+      return;
+    }
+    this.loadData();
+  }
+
+  loadData(): void {
     this.loadInvoices();
+    this.loadCustomers();
+    this.loadProviders();
+  }
+
+  loadCustomers(): void {
+    this.managementService.getCustomers(0, 1000).subscribe({
+      next: (response) => {
+        this.customers = response.content;
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error('Error loading customers:', err);
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: err.error?.message || 'Could not load customers'
+        });
+      }
+    });
+  }
+
+  loadProviders(): void {
+    this.managementService.getProviders(0, 1000).subscribe({
+      next: (response) => {
+        this.providers = response.content;
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error('Error loading providers:', err);
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: err.error?.message || 'Could not load providers'
+        });
+      }
+    });
   }
 
   loadInvoices(): void {
@@ -56,30 +110,19 @@ export class InvoiceComponent implements OnInit {
         this.messageService.add({
           severity: 'error',
           summary: 'Error',
-          detail: 'No se pudieron cargar las facturas'
+          detail: err.error?.message || 'Could not load invoices'
         });
       }
     });
   }
 
-  deleteInvoice(id: number): void {
-    this.billingService.deleteInvoice(id).subscribe({
-      next: () => {
-        this.loadInvoices();
-        this.messageService.add({
-          severity: 'success',
-          summary: 'Éxito',
-          detail: 'Factura eliminada correctamente'
-        });
-      },
-      error: (err) => {
-        console.error('Error deleting invoice:', err);
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Error',
-          detail: 'No se pudo eliminar la factura'
-        });
-      }
-    });
+  getCustomerName(customerId: number): string {
+    const customer = this.customers.find(c => c.id === customerId);
+    return customer?.name || 'N/A';
+  }
+
+  getProviderName(providerId: number): string {
+    const provider = this.providers.find(p => p.id === providerId);
+    return provider?.name || 'N/A';
   }
 }

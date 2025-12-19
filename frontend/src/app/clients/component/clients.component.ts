@@ -72,7 +72,7 @@ export class ClientsComponent implements OnInit {
         this.messageService.add({
           severity: 'error',
           summary: 'Error',
-          detail: 'No se pudieron cargar los clientes'
+          detail: err.error?.message || 'Could not load customers'
         });
       }
     });
@@ -124,7 +124,7 @@ export class ClientsComponent implements OnInit {
             this.messageService.add({
               severity: 'error',
               summary: 'Error',
-              detail: 'No se pudo eliminar el cliente'
+              detail: err.error?.message || 'Could not delete customer'
             });
           }
         });
@@ -157,7 +157,7 @@ export class ClientsComponent implements OnInit {
             this.messageService.add({
               severity: 'error',
               summary: 'Error',
-              detail: 'No se pudo actualizar el cliente'
+              detail: err.error?.message || 'Could not update customer'
             });
           }
         });
@@ -177,7 +177,7 @@ export class ClientsComponent implements OnInit {
             this.messageService.add({
               severity: 'error',
               summary: 'Error',
-              detail: 'No se pudo crear el cliente'
+              detail: err.error?.message || 'Could not create customer'
             });
           }
         });

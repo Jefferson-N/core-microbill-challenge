@@ -120,9 +120,9 @@ npm start
 | Servicio | URL | Descripción |
 |----------|-----|-------------|
 | **Frontend** | http://localhost:4200 | Aplicación Angular |
-| **Auth API** | http://localhost:8081/swagger-ui.html | Autenticación |
-| **Management API** | http://localhost:8082/swagger-ui.html | Gestión CRUD |
-| **Billing API** | http://localhost:8083/swagger-ui.html | Facturación |
+| **Auth API** | http://localhost:8081swagger-ui/index.html | Autenticación |
+| **Management API** | http://localhost:8082swagger-ui/index.html | Gestión CRUD |
+| **Billing API** | http://localhost:8083swagger-ui/index.html | Facturación |
 | **AI API** | http://localhost:8084/docs | Inteligencia Artificial |
 | **RabbitMQ** | http://localhost:15672 | Management UI |
 
@@ -220,35 +220,48 @@ POST /api/ai/anomaly-score → Detección de anomalías
 ## 🎨 **Capturas de Pantalla**
 
 ### Login
-![Login](docs/screenshots/login.png)
+![Login](entregables/img/login.png)
 
-### Dashboard con IA
-![Dashboard](docs/screenshots/dashboard.png)
+### Dashboard
+![Dashboard](entregables/img/dashboard.png)
 
-### Formulario de Factura
-![Invoice Form](docs/screenshots/invoice-form.png)
+### Gestión de Clientes
+![Customers](entregables/img/customers.png)
+
+### Gestión de Proveedores
+![Providers](entregables/img/providers.png)
+
+### Gestión de Productos
+![Products](entregables/img/products.png)
+
+### Lista de Facturas
+![Invoices](entregables/img/invoices.png)
+
+### Formulario de Nueva Factura
+![New Invoice](entregables/img/new-invoice.png)
+
+### Reportes y Gestión Avanzada
+![Reports](entregables/img/reports.png)
+
+## 📁 **Recursos Adicionales**
+
+### Colección de Postman
+- **Archivo**: `Microbill_API_Collection.postman_collection.json`
+- **Descripción**: Colección completa para probar todos los endpoints
+- **Incluye**: Autenticación, CRUD completo, IA, y casos de prueba
+- **Variables**: Configuración automática de tokens y IDs
+
+### Importar en Postman
+1. Abrir Postman
+2. Importar → Seleccionar archivo `Microbill_API_Collection.postman_collection.json`
+3. Configurar variables de entorno si es necesario
+4. Ejecutar requests en orden (Login primero)
 
 ## 📈 **Próximas Mejoras**
 
-- [ ] Implementación completa de JasperReports
-- [ ] Tests E2E con Cypress
 - [ ] CI/CD con GitHub Actions
 - [ ] Observabilidad con Prometheus/Grafana
 - [ ] Notificaciones push
-- [ ] Módulo de inventario avanzado
 
-## 🤝 **Contribución**
-
-1. Fork del proyecto
-2. Crear feature branch
-3. Commit cambios
-4. Push al branch
-5. Crear Pull Request
-
-## 📄 **Licencia**
-
-MIT License - ver [LICENSE](LICENSE) para detalles.
 
 ---
-
-**Desarrollado con ❤️ usando arquitectura de microservicios, IA y las mejores prácticas de desarrollo.**

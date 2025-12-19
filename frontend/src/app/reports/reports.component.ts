@@ -1,16 +1,18 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
+import { Router } from '@angular/router';
 import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
 import { ToastModule } from 'primeng/toast';
 import { DialogModule } from 'primeng/dialog';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { TooltipModule } from 'primeng/tooltip';
-import { MessageService } from 'primeng/api';
+import { MessageService, ConfirmationService } from 'primeng/api';
+import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { BillingService, Invoice } from '../core/services/billing.service';
-import { ManagementService, Product } from '../core/services/management.service';
-import { Observable } from 'rxjs';
+import { ManagementService, Product, Customer, Provider } from '../core/services/management.service';
+import { AuthService } from '../auth/auth.service';
 
 @Component({
   selector: 'app-reports',
@@ -24,38 +26,86 @@ import { Observable } from 'rxjs';
     ToastModule,
     DialogModule,
     InputNumberModule,
-    TooltipModule
+    TooltipModule,
+    ConfirmDialogModule
   ],
   templateUrl: './reports.component.html',
   styleUrls: ['./reports.component.scss'],
-  providers: [MessageService]
+  providers: [MessageService, ConfirmationService]
 })
 export class ReportsComponent implements OnInit {
   invoices: Invoice[] = [];
+  customers: Customer[] = [];
+  providers: Provider[] = [];
+  products: Product[] = [];
   loading = false;
   
-  // View/Edit dialog
   displayDialog = false;
   selectedInvoice: Invoice | null = null;
   editForm: FormGroup;
-  products: Product[] = [];
   isEditing = false;
 
   constructor(
     private billingService: BillingService,
     private managementService: ManagementService,
+    private authService: AuthService,
     private messageService: MessageService,
+    private confirmationService: ConfirmationService,
+    private router: Router,
     private cdr: ChangeDetectorRef,
     private fb: FormBuilder
   ) {
     this.editForm = this.fb.group({
+      customerId: ['', Validators.required],
+      providerId: ['', Validators.required],
       items: this.fb.array([])
     });
   }
 
   ngOnInit(): void {
+    if (!this.authService.isAuthenticated()) {
+      this.authService.logout();
+      this.router.navigate(['/login']);
+      return;
+    }
+    this.loadData();
+  }
+
+  loadData(): void {
     this.loadInvoices();
+    this.loadCustomers();
+    this.loadProviders();
     this.loadProducts();
+  }
+
+  loadCustomers(): void {
+    this.managementService.getCustomers(0, 1000).subscribe({
+      next: (response) => {
+        this.customers = response.content;
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        if (err.status === 401) {
+          this.authService.logout();
+          this.router.navigate(['/login']);
+        }
+      }
+    });
+  }
+
+  loadProviders(): void {
+    this.managementService.getProviders(0, 1000).subscribe({
+      next: (response) => {
+        this.providers = response.content;
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        if (err.status === 401) {
+          this.authService.logout();
+          this.router.navigate(['/login']);
+        }
+      }
+    });
   }
 
   get itemsFormArray(): FormArray {
@@ -63,8 +113,17 @@ export class ReportsComponent implements OnInit {
   }
 
   loadProducts(): void {
-    this.managementService.getProducts(0, 100).subscribe(response => {
-      this.products = response.content;
+    this.managementService.getProducts(0, 1000).subscribe({
+      next: (response) => {
+        this.products = response.content;
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        if (err.status === 401) {
+          this.authService.logout();
+          this.router.navigate(['/login']);
+        }
+      }
     });
   }
 
@@ -128,6 +187,14 @@ export class ReportsComponent implements OnInit {
   }
 
   editInvoice(invoice: Invoice): void {
+    if (!this.customers.length || !this.providers.length) {
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Advertencia',
+        detail: 'No se puede editar: faltan datos de clientes o proveedores'
+      });
+      return;
+    }
     this.selectedInvoice = invoice;
     this.isEditing = true;
     this.setupEditForm(invoice);
@@ -135,6 +202,10 @@ export class ReportsComponent implements OnInit {
   }
 
   setupEditForm(invoice: Invoice): void {
+    this.editForm.patchValue({
+      customerId: invoice.customerId,
+      providerId: invoice.providerId
+    });
     this.itemsFormArray.clear();
     invoice.items?.forEach(item => {
       const itemForm = this.fb.group({
@@ -210,23 +281,40 @@ export class ReportsComponent implements OnInit {
   }
 
   deleteInvoice(id: number): void {
-    this.billingService.deleteInvoice(id).subscribe({
-      next: () => {
-        this.loadInvoices();
-        this.messageService.add({
-          severity: 'success',
-          summary: 'Éxito',
-          detail: 'Factura eliminada correctamente'
-        });
-      },
-      error: (err) => {
-        console.error('Error deleting invoice:', err);
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Error',
-          detail: 'No se pudo eliminar la factura'
+    this.confirmationService.confirm({
+      message: '¿Está seguro de que desea eliminar esta factura?',
+      header: 'Confirmar Eliminación',
+      icon: 'pi pi-exclamation-triangle',
+      accept: () => {
+        this.billingService.deleteInvoice(id).subscribe({
+          next: () => {
+            this.loadInvoices();
+            this.messageService.add({
+              severity: 'success',
+              summary: 'Éxito',
+              detail: 'Factura eliminada correctamente'
+            });
+          },
+          error: (err) => {
+            console.error('Error deleting invoice:', err);
+            this.messageService.add({
+              severity: 'error',
+              summary: 'Error',
+              detail: 'No se pudo eliminar la factura'
+            });
+          }
         });
       }
     });
+  }
+
+  getCustomerName(customerId: number): string {
+    const customer = this.customers.find(c => c.id === customerId);
+    return customer?.name || 'N/A';
+  }
+
+  getProviderName(providerId: number): string {
+    const provider = this.providers.find(p => p.id === providerId);
+    return provider?.name || 'N/A';
   }
 }

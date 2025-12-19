@@ -29,15 +29,15 @@
         <th>Impuestos</th>
         <th>Total</th>
         <th>Estado</th>
-        <th>Acciones</th>
+
       </tr>
     </ng-template>
     
     <ng-template pTemplate="body" let-invoice>
       <tr>
         <td>{{ invoice.id }}</td>
-        <td>{{ invoice.customer?.name || 'N/A' }}</td>
-        <td>{{ invoice.provider?.name || 'N/A' }}</td>
+        <td>{{ getCustomerName(invoice.customerId) }}</td>
+        <td>{{ getProviderName(invoice.providerId) }}</td>
         <td>{{ invoice.issueDate | date:'short' }}</td>
         <td>{{ invoice.subtotal | currency:'USD':'symbol':'1.2-2' }}</td>
         <td>{{ invoice.taxTotal | currency:'USD':'symbol':'1.2-2' }}</td>
@@ -53,24 +53,17 @@
             {{ invoice.status }}
           </span>
         </td>
-        <td>
-          <button 
-            pButton 
-            icon="pi pi-trash" 
-            class="p-button-rounded p-button-danger"
-            (click)="deleteInvoice(invoice.id!)" 
-            pTooltip="Eliminar factura">
-          </button>
-        </td>
+
       </tr>
     </ng-template>
     
     <ng-template pTemplate="emptymessage">
       <tr>
-        <td colspan="9" class="text-center">No hay facturas disponibles</td>
+        <td colspan="8" class="text-center">No hay facturas disponibles</td>
       </tr>
     </ng-template>
   </p-table>
   
+
   <p-toast></p-toast>
 </div>

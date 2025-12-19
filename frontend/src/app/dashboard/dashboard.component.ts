@@ -59,13 +59,6 @@ export class DashboardComponent {
         separator: true
       },
       {
-        label: 'API Specification',
-        icon: 'pi pi-book',
-        command: () => {
-          window.open('/assets/docs/API_SPECIFICATION.html', '_blank');
-        }
-      },
-      {
         label: 'Postman Collection',
         icon: 'pi pi-download',
         command: () => {

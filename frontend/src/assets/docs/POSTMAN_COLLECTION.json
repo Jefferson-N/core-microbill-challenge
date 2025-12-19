@@ -870,19 +870,19 @@
 		},
 		{
 			"key": "auth_port",
-			"value": "8079"
-		},
-		{
-			"key": "management_port",
 			"value": "8081"
 		},
 		{
+			"key": "management_port",
+			"value": "8082"
+		},
+		{
 			"key": "billing_port",
-			"value": "8080"
+			"value": "8083"
 		},
 		{
 			"key": "ai_port",
-			"value": "8082"
+			"value": "8084"
 		},
 		{
 			"key": "jwt_token",

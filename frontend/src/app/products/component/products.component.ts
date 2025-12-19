@@ -67,7 +67,7 @@ export class ProductsComponent implements OnInit {
         this.messageService.add({
           severity: 'error',
           summary: 'Error',
-          detail: 'No se pudieron cargar los productos'
+          detail: err.error?.message || 'Could not load products'
         });
       }
     });
@@ -110,7 +110,7 @@ export class ProductsComponent implements OnInit {
             this.messageService.add({
               severity: 'error',
               summary: 'Error',
-              detail: 'No se pudo eliminar el producto'
+              detail: err.error?.message || 'Could not delete product'
             });
           }
         });
@@ -143,7 +143,7 @@ export class ProductsComponent implements OnInit {
             this.messageService.add({
               severity: 'error',
               summary: 'Error',
-              detail: 'No se pudo actualizar el producto'
+              detail: err.error?.message || 'Could not update product'
             });
           }
         });
@@ -163,7 +163,7 @@ export class ProductsComponent implements OnInit {
             this.messageService.add({
               severity: 'error',
               summary: 'Error',
-              detail: 'No se pudo crear el producto'
+              detail: err.error?.message || 'Could not create product'
             });
           }
         });

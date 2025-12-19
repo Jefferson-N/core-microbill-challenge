@@ -11,6 +11,6 @@ import { ToastModule } from 'primeng/toast';
   styleUrls: ['./app.scss']
 })
 export class App {
-  protected readonly title = signal('ch-invoice-app');
+  protected readonly title = signal('microbill-frontend');
 
 }

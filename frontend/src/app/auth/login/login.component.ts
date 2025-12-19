@@ -52,7 +52,7 @@ export class LoginComponent {
             summary: 'Login exitoso',
             detail: `Bienvenido ${response.username}`
           });
-          this.router.navigate(['/dashboard']);
+          this.router.navigate(['/customers']);
         },
         error: (err) => {
           console.error('Error en login:', err);
