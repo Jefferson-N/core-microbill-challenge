@@ -222,26 +222,38 @@ POST /api/ai/anomaly-score → Detección de anomalías
 ### Login
 ![Login](entregables/img/login.png)
 
-### Dashboard
-![Dashboard](entregables/img/dashboard.png)
-
-### Gestión de Clientes
-![Customers](entregables/img/customers.png)
+### Pantalla Principal
+![Pantalla Principal](entregables/img/Pantalla%20Principal.png)
 
 ### Gestión de Proveedores
-![Providers](entregables/img/providers.png)
+![Proveedores](entregables/img/Proveedores.png)
 
 ### Gestión de Productos
-![Products](entregables/img/products.png)
+![Productos](entregables/img/Productos.png)
 
-### Lista de Facturas
-![Invoices](entregables/img/invoices.png)
+### Crear Factura
+![Crear Factura](entregables/img/Crear%20Factura.png)
 
-### Formulario de Nueva Factura
-![New Invoice](entregables/img/new-invoice.png)
+### Ver Facturas
+![Ver Facturas](entregables/img/Ver%20Facturas.png)
 
-### Reportes y Gestión Avanzada
-![Reports](entregables/img/reports.png)
+### Vista de Factura
+![Vista de Factura](entregables/img/Vista%20de%20factura.png)
+
+### Reportes
+![Reportes](entregables/img/Reportes.png)
+
+### Reportes y Modificaciones
+![Reportes y Modificaciones](entregables/img/Reportes%20y%20modificaciones.png)
+
+### Generación de Reporte
+![Reporte](entregables/img/Reporte.png)
+
+### Documentación
+![Documentación](entregables/img/Documentación.png)
+
+### Confirmación de Eliminación
+![Eliminación](entregables/img/Eliminación.png)
 
 ## 📁 **Recursos Adicionales**
 

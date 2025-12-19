@@ -222,26 +222,38 @@ POST /api/ai/anomaly-score → Anomaly detection
 ### Login
 ![Login](entregables/img/login.png)
 
-### Dashboard
-![Dashboard](entregables/img/dashboard.png)
-
-### Customer Management
-![Customers](entregables/img/customers.png)
+### Main Dashboard
+![Dashboard](entregables/img/Pantalla%20Principal.png)
 
 ### Provider Management
-![Providers](entregables/img/providers.png)
+![Providers](entregables/img/Proveedores.png)
 
 ### Product Management
-![Products](entregables/img/products.png)
+![Products](entregables/img/Productos.png)
+
+### Create Invoice
+![Create Invoice](entregables/img/Crear%20Factura.png)
 
 ### Invoice List
-![Invoices](entregables/img/invoices.png)
+![Invoice List](entregables/img/Ver%20Facturas.png)
 
-### New Invoice Form
-![New Invoice](entregables/img/new-invoice.png)
+### Invoice View
+![Invoice View](entregables/img/Vista%20de%20factura.png)
 
-### Reports and Advanced Management
-![Reports](entregables/img/reports.png)
+### Reports
+![Reports](entregables/img/Reportes.png)
+
+### Reports and Modifications
+![Reports and Modifications](entregables/img/Reportes%20y%20modificaciones.png)
+
+### Report Generation
+![Report Generation](entregables/img/Reporte.png)
+
+### Documentation
+![Documentation](entregables/img/Documentación.png)
+
+### Delete Confirmation
+![Delete Confirmation](entregables/img/Eliminación.png)
 
 ## 📁 **Additional Resources**
 
