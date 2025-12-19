@@ -14,17 +14,12 @@ public class EventConsumer {
         log.info("Processing InvoiceCreated event for invoice: {}", event.getInvoiceId());
         
         try {
-            generatePdfAsync(event);
             sendNotification(event);
             
             log.info("Successfully processed InvoiceCreated event for invoice: {}", event.getInvoiceId());
         } catch (Exception e) {
             log.error("Failed to process InvoiceCreated event for invoice: {}", event.getInvoiceId(), e);
         }
-    }
-
-    private void generatePdfAsync(InvoiceCreatedEvent event) {
-        log.info("Generating PDF asynchronously for invoice: {}", event.getInvoiceId());
     }
 
     private void sendNotification(InvoiceCreatedEvent event) {

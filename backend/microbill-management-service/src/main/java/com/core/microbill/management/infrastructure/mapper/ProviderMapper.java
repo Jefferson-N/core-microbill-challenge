@@ -1,6 +1,7 @@
-package com.core.microbill.management.infrastructure.adapter.out.persistence;
+package com.core.microbill.management.infrastructure.mapper;
 
 import com.core.microbill.management.domain.model.Provider;
+import com.core.microbill.management.infrastructure.adapter.out.entities.ProviderEntity;
 import org.mapstruct.Mapper;
 
 @Mapper(componentModel = "spring")

@@ -1,4 +1,4 @@
-package com.core.microbill.management.infrastructure.adapter.out.persistence;
+package com.core.microbill.management.infrastructure.adapter.out.entities;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

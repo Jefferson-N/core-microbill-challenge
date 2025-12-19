@@ -153,13 +153,14 @@
       
       <div *ngIf="recommendations">
         <h4>{{ recommendations.reason }}</h4>
-        <div *ngFor="let product of recommendations.products" class="mb-2">
+        <div *ngFor="let recommendation of recommendations.products" class="mb-2">
           <p-button 
-            [label]="product.name + ' - ' + (product.price | currency)"
+            [label]="recommendation.productName + ' - ' + (recommendation.price | currency) + ' (Score: ' + (recommendation.score * 100 | number:'1.0-0') + '%)'"
             class="w-full"
             severity="secondary"
             size="small"
-            (onClick)="addRecommendedProduct(product)">
+            (onClick)="addRecommendedProduct(recommendation)"
+            [title]="recommendation.reason">
           </p-button>
         </div>
       </div>

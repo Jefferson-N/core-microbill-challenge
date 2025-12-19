@@ -81,6 +81,8 @@ services:
     depends_on:
       mysql:
         condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
     networks:
       - microbill-network
     restart: unless-stopped
@@ -115,8 +117,17 @@ services:
       context: ./microbill-billing-ia
       dockerfile: Dockerfile
     container_name: microbill-ai-service
+    environment:
+      DB_HOST: ${DB_HOST:-mysql}
+      DB_USER: ${DB_USER:-admin}
+      DB_PASSWORD: ${DB_PASSWORD:-admin123}
+      DB_PORT: ${DB_PORT:-3306}
+      DB_NAME: ${DB_NAME:-microbill}
     ports:
       - "${AI_SERVICE_PORT:-8084}:8084"
+    depends_on:
+      mysql:
+        condition: service_healthy
     networks:
       - microbill-network
     restart: unless-stopped

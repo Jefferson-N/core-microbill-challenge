@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
 import { ButtonModule } from 'primeng/button';
@@ -9,7 +9,7 @@ import { CardModule } from 'primeng/card';
 import { PanelModule } from 'primeng/panel';
 import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
-import { BillingService, Invoice, InvoiceItem, RecommendationResponse, AnomalyResponse } from '../../core/services/billing.service';
+import { BillingService, Invoice, InvoiceItem, RecommendationResponse, AnomalyResponse, ProductRecommendation } from '../../core/services/billing.service';
 import { ManagementService, Customer, Provider, Product } from '../../core/services/management.service';
 
 @Component({
@@ -29,7 +29,8 @@ import { ManagementService, Customer, Provider, Product } from '../../core/servi
   ],
   templateUrl: './invoice-form.component.html',
   styleUrls: ['./invoice-form.component.scss'],
-  providers: [MessageService]
+  providers: [MessageService],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class InvoiceFormComponent implements OnInit {
 
@@ -47,7 +48,8 @@ export class InvoiceFormComponent implements OnInit {
     private fb: FormBuilder,
     private billingService: BillingService,
     private managementService: ManagementService,
-    private messageService: MessageService
+    private messageService: MessageService,
+    private cdr: ChangeDetectorRef
   ) {
     this.invoiceForm = this.fb.group({
       customerId: ['', Validators.required],
@@ -57,8 +59,10 @@ export class InvoiceFormComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.loadData();
-    this.addItem();
+    setTimeout(() => {
+      this.loadData();
+      this.addItem();
+    }, 0);
   }
 
   get itemsFormArray(): FormArray {
@@ -68,14 +72,17 @@ export class InvoiceFormComponent implements OnInit {
   loadData(): void {
     this.managementService.getCustomers(0, 100).subscribe(response => {
       this.customers = response.content;
+      this.cdr.detectChanges();
     });
 
     this.managementService.getProviders(0, 100).subscribe(response => {
       this.providers = response.content;
+      this.cdr.detectChanges();
     });
 
     this.managementService.getProducts(0, 100).subscribe(response => {
       this.products = response.content;
+      this.cdr.detectChanges();
     });
   }
 
@@ -119,6 +126,7 @@ export class InvoiceFormComponent implements OnInit {
     }));
     
     this.invoiceTotals = this.billingService.calculateInvoiceTotals(items);
+    this.cdr.markForCheck();
   }
 
   getItemSubtotal(index: number): number {
@@ -141,7 +149,10 @@ export class InvoiceFormComponent implements OnInit {
     if (customerId) {
       this.billingService.getRecommendations(customerId).subscribe({
         next: (response) => {
-          this.recommendations = response;
+          setTimeout(() => {
+            this.recommendations = response;
+            this.cdr.detectChanges();
+          }, 0);
         },
         error: (err) => {
           console.error('Error getting recommendations:', err);
@@ -155,9 +166,9 @@ export class InvoiceFormComponent implements OnInit {
     }
   }
 
-  addRecommendedProduct(product: Product): void {
+  addRecommendedProduct(recommendation: ProductRecommendation): void {
     const existingIndex = this.itemsFormArray.controls.findIndex(
-      control => control.get('productId')?.value == product.id
+      control => control.get('productId')?.value == recommendation.productId
     );
 
     if (existingIndex >= 0) {
@@ -166,13 +177,15 @@ export class InvoiceFormComponent implements OnInit {
       existingItem.patchValue({ quantity: currentQuantity + 1 });
       this.calculateItemTotal(existingIndex);
     } else {
+      // Find the actual product for tax rate
+      const product = this.products.find(p => p.id === recommendation.productId);
       this.addItem();
       const newIndex = this.itemsFormArray.length - 1;
       this.itemsFormArray.at(newIndex).patchValue({
-        productId: product.id,
+        productId: recommendation.productId,
         quantity: 1,
-        unitPrice: product.price,
-        taxRate: product.taxRate
+        unitPrice: recommendation.price,
+        taxRate: product?.taxRate || 0.19
       });
       this.calculateItemTotal(newIndex);
     }
@@ -185,7 +198,10 @@ export class InvoiceFormComponent implements OnInit {
     if (customerId && items.length > 0) {
       this.billingService.detectAnomalies(customerId, this.invoiceTotals.total, items).subscribe({
         next: (response) => {
-          this.anomalyResult = response;
+          setTimeout(() => {
+            this.anomalyResult = response;
+            this.cdr.detectChanges();
+          }, 0);
         },
         error: (err) => {
           console.error('Error detecting anomalies:', err);

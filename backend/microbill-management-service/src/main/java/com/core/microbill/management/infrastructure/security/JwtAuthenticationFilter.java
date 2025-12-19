@@ -1,4 +1,4 @@
-package com.core.microbill.billing.infrastructure.security;
+package com.core.microbill.management.infrastructure.security;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -43,18 +43,19 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         String requestURI = request.getRequestURI();
 
-        if (requestURI.startsWith("/internal/")
-                || requestURI.startsWith("/swagger-ui/")
+        if (requestURI.startsWith("/swagger-ui/")
                 || requestURI.startsWith("/v3/api-docs")
-                || requestURI.startsWith("/actuator/")) {
+                || requestURI.startsWith("/actuator/")
+                || requestURI.startsWith("/internal/")) {
             filterChain.doFilter(request, response);
             return;
         }
 
+
         String authHeader = request.getHeader("Authorization");
         String[] authorizations =  Objects.toString(authHeader,"").trim().split(" ");
         if ( authorizations.length == 1 ) {
-            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid token");
+           // response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid token");
             return;
         }
         String token = authorizations[1];

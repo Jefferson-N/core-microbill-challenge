@@ -1,9 +1,12 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import List, Optional
 import numpy as np
 from datetime import datetime
+from sqlalchemy.orm import Session
+from database import get_db, Product
+from ai_models import recommendation_model, anomaly_model, train_models
 
 app = FastAPI(title="MicroBill AI Service", version="1.0.0")
 
@@ -19,13 +22,14 @@ app.add_middleware(
 class ProductRecommendation(BaseModel):
     productId: int
     productName: str
+    price: float
     score: float
     reason: str
 
 class RecommendationResponse(BaseModel):
     customerId: int
     products: List[ProductRecommendation]
-    generatedAt: str
+    reason: str
 
 class InvoiceItem(BaseModel):
     productId: int
@@ -34,16 +38,25 @@ class InvoiceItem(BaseModel):
     taxRate: float
 
 class AnomalyRequest(BaseModel):
-    invoiceId: int
     customerId: int
     items: List[InvoiceItem]
     total: float
 
 class AnomalyResponse(BaseModel):
-    invoiceId: int
     score: float
-    isAnomaly: bool
     explanation: str
+
+@app.on_event("startup")
+async def startup_event():
+    """Train AI models on startup"""
+    try:
+        success = train_models()
+        if success:
+            print("AI models trained successfully")
+        else:
+            print("Warning: AI models training failed - using fallback logic")
+    except Exception as e:
+        print(f"Error training models: {e}")
 
 @app.get("/")
 def root():
@@ -53,88 +66,100 @@ def root():
 def health():
     return {"status": "healthy"}
 
+@app.post("/api/ai/retrain")
+def retrain_models():
+    """Manually retrain AI models"""
+    try:
+        success = train_models()
+        return {"success": success, "message": "Models retrained" if success else "Training failed"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 @app.post("/api/ai/recommendations", response_model=RecommendationResponse)
-def get_recommendations(customerId: int):
+def get_recommendations(customerId: int, db: Session = Depends(get_db)):
     """Generate product recommendations for a customer based on purchase history"""
     
-    # Simulación de recomendaciones basadas en historial
-    recommendations = [
-        ProductRecommendation(
-            productId=1,
-            productName="Laptop Dell XPS 15",
-            score=0.92,
-            reason="Frequently purchased by similar customers"
-        ),
-        ProductRecommendation(
-            productId=2,
-            productName="Mouse Logitech MX Master",
-            score=0.87,
-            reason="Complementary to previous purchases"
-        ),
-        ProductRecommendation(
-            productId=3,
-            productName="USB-C Hub",
-            score=0.78,
-            reason="Popular accessory for your device category"
+    try:
+        # Get recommendations from trained model
+        recommendations_data = recommendation_model.get_recommendations(customerId, top_k=5)
+        
+        if not recommendations_data:
+            # Fallback to popular products
+            popular_products = db.query(Product).limit(3).all()
+            recommendations_data = [{
+                'productId': p.id,
+                'productName': p.name,
+                'score': 0.7,
+                'reason': 'Popular product'
+            } for p in popular_products]
+        
+        # Enrich with product details
+        recommendations = []
+        for rec in recommendations_data:
+            product = db.query(Product).filter(Product.id == rec['productId']).first()
+            if product:
+                recommendations.append(ProductRecommendation(
+                    productId=rec['productId'],
+                    productName=rec['productName'],
+                    price=product.price,
+                    score=rec['score'],
+                    reason=rec['reason']
+                ))
+        
+        return RecommendationResponse(
+            customerId=customerId,
+            products=recommendations,
+            reason="Based on your purchase history and similar customers"
         )
-    ]
-    
-    return RecommendationResponse(
-        customerId=customerId,
-        products=recommendations,
-        generatedAt=datetime.now().isoformat()
-    )
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error generating recommendations: {str(e)}")
 
 @app.post("/api/ai/anomaly-score", response_model=AnomalyResponse)
 def detect_anomaly(request: AnomalyRequest):
-    """Detect anomalies in invoice amounts using statistical analysis"""
+    """Detect anomalies in invoice amounts using trained ML model"""
     
-    # Calcular métricas de la factura
-    total_items = len(request.items)
-    avg_unit_price = np.mean([item.unitPrice for item in request.items])
-    total_quantity = sum([item.quantity for item in request.items])
-    
-    # Simulación de detección de anomalías
-    # En producción, esto usaría modelos ML entrenados con datos históricos
-    anomaly_score = 0.0
-    explanation_parts = []
-    
-    # Regla 1: Total muy alto
-    if request.total > 10000:
-        anomaly_score += 0.3
-        explanation_parts.append(f"High total amount: ${request.total:.2f}")
-    
-    # Regla 2: Cantidad inusual de items
-    if total_items > 20:
-        anomaly_score += 0.2
-        explanation_parts.append(f"Unusual number of items: {total_items}")
-    
-    # Regla 3: Precio unitario promedio muy alto
-    if avg_unit_price > 1000:
-        anomaly_score += 0.25
-        explanation_parts.append(f"High average unit price: ${avg_unit_price:.2f}")
-    
-    # Regla 4: Cantidad total muy alta
-    if total_quantity > 100:
-        anomaly_score += 0.25
-        explanation_parts.append(f"High total quantity: {total_quantity}")
-    
-    # Normalizar score entre 0 y 1
-    anomaly_score = min(anomaly_score, 1.0)
-    
-    is_anomaly = anomaly_score > 0.5
-    
-    if not explanation_parts:
-        explanation = "Invoice appears normal based on historical patterns"
-    else:
-        explanation = "Potential anomaly detected: " + "; ".join(explanation_parts)
-    
-    return AnomalyResponse(
-        invoiceId=request.invoiceId,
-        score=round(anomaly_score, 2),
-        isAnomaly=is_anomaly,
-        explanation=explanation
-    )
+    try:
+        total_items = len(request.items)
+        avg_unit_price = np.mean([item.unitPrice for item in request.items]) if request.items else 0
+        total_quantity = sum([item.quantity for item in request.items])
+        unique_products = len(set([item.productId for item in request.items]))
+        
+        invoice_data = {
+            'total': request.total,
+            'items_count': total_items,
+            'avg_item_price': avg_unit_price,
+            'total_quantity': total_quantity,
+            'unique_products': unique_products
+        }
+        
+        # Use trained model for anomaly detection
+        anomaly_score, explanation = anomaly_model.detect_anomaly(invoice_data)
+        
+        return AnomalyResponse(
+            score=round(anomaly_score, 2),
+            explanation=explanation
+        )
+        
+    except Exception as e:
+        anomaly_score = 0.0
+        explanation_parts = []
+        
+        if request.total > 10000:
+            anomaly_score += 0.3
+            explanation_parts.append(f"High total: ${request.total:.2f}")
+        
+        if len(request.items) > 20:
+            anomaly_score += 0.2
+            explanation_parts.append(f"Many items: {len(request.items)}")
+        
+        anomaly_score = min(anomaly_score, 1.0)
+        explanation = "Fallback analysis: " + ("Normal invoice" if not explanation_parts else "; ".join(explanation_parts))
+        
+        return AnomalyResponse(
+            score=round(anomaly_score, 2),
+            explanation=explanation
+        )
 
 if __name__ == "__main__":
     import uvicorn

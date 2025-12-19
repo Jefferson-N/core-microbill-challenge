@@ -1,7 +1,10 @@
-package com.core.microbill.management.infrastructure.adapter.out.persistence;
+package com.core.microbill.management.infrastructure.adapter.out;
 
 import com.core.microbill.management.domain.model.Provider;
 import com.core.microbill.management.domain.port.out.ProviderOutputPort;
+import com.core.microbill.management.infrastructure.adapter.out.entities.ProviderEntity;
+import com.core.microbill.management.infrastructure.adapter.out.persistence.ProviderJpaRepository;
+import com.core.microbill.management.infrastructure.mapper.ProviderMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

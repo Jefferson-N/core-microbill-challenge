@@ -1,4 +1,4 @@
-package com.core.microbill.management.infrastructure.adapter.out.persistence;
+package com.core.microbill.management.infrastructure.adapter.out.entities;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -8,30 +8,35 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "customers")
+@Table(name = "products")
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class CustomerEntity {
+public class ProductEntity {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     
+    @Column(nullable = false, unique = true)
+    private String code;
+    
     @Column(nullable = false)
     private String name;
     
-    @Column(name = "doc_number", nullable = false, unique = true)
-    private String docNumber;
+    @Column(nullable = false, precision = 10, scale = 2)
+    private BigDecimal price;
+    
+    @Column(name = "tax_rate", nullable = false, precision = 5, scale = 2)
+    private BigDecimal taxRate;
     
     @Column(nullable = false)
-    private String email;
-    
-    private String address;
+    private Integer stock;
     
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)

@@ -28,8 +28,17 @@ export interface Invoice {
   items: InvoiceItem[];
 }
 
+export interface ProductRecommendation {
+  productId: number;
+  productName: string;
+  price: number;
+  score: number;
+  reason: string;
+}
+
 export interface RecommendationResponse {
-  products: Product[];
+  customerId: number;
+  products: ProductRecommendation[];
   reason: string;
 }
 
@@ -80,15 +89,14 @@ export class BillingService {
   // AI methods
   getRecommendations(customerId: number): Observable<RecommendationResponse> {
     const params = new HttpParams().set('customerId', customerId.toString());
-    return this.http.post<RecommendationResponse>(`${this.billingUrl}/ai/recommendations`, null, { params });
+    return this.http.post<RecommendationResponse>(`${this.aiUrl}/ai/recommendations`, null, { params });
   }
 
   detectAnomalies(customerId: number, total: number, items: InvoiceItem[]): Observable<AnomalyResponse> {
     const request = { customerId, total, items };
-    return this.http.post<AnomalyResponse>(`${this.billingUrl}/ai/anomaly-score`, request);
+    return this.http.post<AnomalyResponse>(`${this.aiUrl}/ai/anomaly-score`, request);
   }
 
-  // Utility methods
   calculateInvoiceTotals(items: InvoiceItem[]): { subtotal: number; taxTotal: number; total: number } {
     let subtotal = 0;
     let taxTotal = 0;
@@ -96,10 +104,10 @@ export class BillingService {
     items.forEach(item => {
       const itemSubtotal = item.quantity * item.unitPrice;
       const itemTax = itemSubtotal * (item.taxRate || 0);
-      
+
       subtotal += itemSubtotal;
       taxTotal += itemTax;
-      
+
       item.lineTotal = itemSubtotal + itemTax;
     });
 
