@@ -175,8 +175,6 @@ POST /api/ai/anomaly-score → Detección de anomalías
 ### Detección de Anomalías
 - Score de riesgo (0-100%)
 - Análisis de patrones atípicos
-- Explicaciones detalladas
-- Alertas visuales por nivel de riesgo
 
 ## 🏛️ **Arquitectura Técnica**
 
@@ -198,24 +196,11 @@ POST /api/ai/anomaly-score → Detección de anomalías
 - **RabbitMQ**: Eventos asíncronos
 - **JWT**: Autenticación stateless
 
-## 🧪 **Testing**
-
-```bash
-# Backend Tests
-mvn test
-
-# Frontend Tests  
-npm test
-
-# E2E Tests
-npm run e2e
-```
-
 ## 📦 **Tecnologías**
 
 ### Backend
 - Java 21, Spring Boot 3.5.8
-- MySQL 8.0, JPA/Hibernate
+- MySQL 9.4, JPA/Hibernate
 - RabbitMQ, JWT
 - MapStruct, Lombok
 - JasperReports, OpenAPI
