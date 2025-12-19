@@ -7,6 +7,9 @@ servers:
   - url: http://localhost:8082/api
     description: Local server
 
+security:
+  - BearerAuth: []
+
 tags:
   - name: Customers
     description: Customer management
@@ -22,6 +25,8 @@ paths:
         - Customers
       summary: Get all customers
       operationId: getCustomers
+      security:
+        - BearerAuth: []
       parameters:
         - name: page
           in: query
@@ -61,6 +66,8 @@ paths:
         - Customers
       summary: Create customer
       operationId: createCustomer
+      security:
+        - BearerAuth: []
       requestBody:
         required: true
         content:
@@ -99,6 +106,8 @@ paths:
         - Customers
       summary: Get customer by ID
       operationId: getCustomerById
+      security:
+        - BearerAuth: []
       parameters:
         - name: id
           in: path
@@ -120,6 +129,8 @@ paths:
         - Customers
       summary: Update customer
       operationId: updateCustomer
+      security:
+        - BearerAuth: []
       parameters:
         - name: id
           in: path
@@ -145,6 +156,8 @@ paths:
         - Customers
       summary: Delete customer
       operationId: deleteCustomer
+      security:
+        - BearerAuth: []
       parameters:
         - name: id
           in: path
@@ -162,6 +175,8 @@ paths:
         - Providers
       summary: Get all providers
       operationId: getProviders
+      security:
+        - BearerAuth: []
       parameters:
         - name: page
           in: query
@@ -189,6 +204,8 @@ paths:
         - Providers
       summary: Create provider
       operationId: createProvider
+      security:
+        - BearerAuth: []
       requestBody:
         required: true
         content:
@@ -209,6 +226,8 @@ paths:
         - Providers
       summary: Get provider by ID
       operationId: getProviderById
+      security:
+        - BearerAuth: []
       parameters:
         - name: id
           in: path
@@ -228,6 +247,8 @@ paths:
         - Providers
       summary: Update provider
       operationId: updateProvider
+      security:
+        - BearerAuth: []
       parameters:
         - name: id
           in: path
@@ -253,6 +274,8 @@ paths:
         - Providers
       summary: Delete provider
       operationId: deleteProvider
+      security:
+        - BearerAuth: []
       parameters:
         - name: id
           in: path
@@ -270,6 +293,8 @@ paths:
         - Products
       summary: Get all products
       operationId: getProducts
+      security:
+        - BearerAuth: []
       parameters:
         - name: page
           in: query
@@ -297,6 +322,8 @@ paths:
         - Products
       summary: Create product
       operationId: createProduct
+      security:
+        - BearerAuth: []
       requestBody:
         required: true
         content:
@@ -317,6 +344,8 @@ paths:
         - Products
       summary: Get product by ID
       operationId: getProductById
+      security:
+        - BearerAuth: []
       parameters:
         - name: id
           in: path
@@ -336,6 +365,8 @@ paths:
         - Products
       summary: Update product
       operationId: updateProduct
+      security:
+        - BearerAuth: []
       parameters:
         - name: id
           in: path
@@ -361,6 +392,8 @@ paths:
         - Products
       summary: Delete product
       operationId: deleteProduct
+      security:
+        - BearerAuth: []
       parameters:
         - name: id
           in: path
@@ -373,6 +406,13 @@ paths:
           description: Product deleted
 
 components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT token for authentication
+  
   schemas:
     CustomerRequest:
       type: object

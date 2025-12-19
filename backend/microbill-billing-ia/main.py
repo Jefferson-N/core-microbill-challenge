@@ -52,9 +52,9 @@ async def startup_event():
     try:
         success = train_models()
         if success:
-            print("AI models trained successfully")
+            print("Modelos de IA entrenados exitosamente")
         else:
-            print("Warning: AI models training failed - using fallback logic")
+            print("Advertencia: Entrenamiento de modelos de IA falló - usando lógica de respaldo")
     except Exception as e:
         print(f"Error training models: {e}")
 
@@ -71,9 +71,9 @@ def retrain_models():
     """Manually retrain AI models"""
     try:
         success = train_models()
-        return {"success": success, "message": "Models retrained" if success else "Training failed"}
+        return {"success": success, "message": "Modelos reentrenados" if success else "Entrenamiento falló"}
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="Su operación no pudo ser procesada, consulte con el administrador")
 
 @app.post("/api/ai/recommendations", response_model=RecommendationResponse)
 def get_recommendations(customerId: int, db: Session = Depends(get_db)):
@@ -90,7 +90,7 @@ def get_recommendations(customerId: int, db: Session = Depends(get_db)):
                 'productId': p.id,
                 'productName': p.name,
                 'score': 0.7,
-                'reason': 'Popular product'
+                'reason': 'Producto popular'
             } for p in popular_products]
         
         # Enrich with product details
@@ -109,11 +109,11 @@ def get_recommendations(customerId: int, db: Session = Depends(get_db)):
         return RecommendationResponse(
             customerId=customerId,
             products=recommendations,
-            reason="Based on your purchase history and similar customers"
+            reason="Basado en su historial de compras y clientes similares"
         )
         
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error generating recommendations: {str(e)}")
+        raise HTTPException(status_code=500, detail="Su operación no pudo ser procesada, consulte con el administrador")
 
 @app.post("/api/ai/anomaly-score", response_model=AnomalyResponse)
 def detect_anomaly(request: AnomalyRequest):
@@ -147,14 +147,14 @@ def detect_anomaly(request: AnomalyRequest):
         
         if request.total > 10000:
             anomaly_score += 0.3
-            explanation_parts.append(f"High total: ${request.total:.2f}")
+            explanation_parts.append(f"Total alto: ${request.total:.2f}")
         
         if len(request.items) > 20:
             anomaly_score += 0.2
-            explanation_parts.append(f"Many items: {len(request.items)}")
+            explanation_parts.append(f"Muchos artículos: {len(request.items)}")
         
         anomaly_score = min(anomaly_score, 1.0)
-        explanation = "Fallback analysis: " + ("Normal invoice" if not explanation_parts else "; ".join(explanation_parts))
+        explanation = "Análisis de respaldo: " + ("Factura normal" if not explanation_parts else "; ".join(explanation_parts))
         
         return AnomalyResponse(
             score=round(anomaly_score, 2),

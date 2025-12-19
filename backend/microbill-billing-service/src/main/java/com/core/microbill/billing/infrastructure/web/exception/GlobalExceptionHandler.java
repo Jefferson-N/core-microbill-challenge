@@ -5,6 +5,7 @@ import com.core.microbill.billing.domain.exception.AuthorizationException;
 import com.core.microbill.billing.domain.exception.BusinessLogicException;
 import com.core.microbill.billing.domain.exception.ResourceNotFoundException;
 import com.core.microbill.billing.domain.exception.ValidationException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -14,6 +15,7 @@ import org.springframework.web.context.request.WebRequest;
 
 import java.util.stream.Collectors;
 
+@Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
@@ -21,7 +23,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleValidationException(ValidationException ex, WebRequest request) {
         ErrorResponse error = new ErrorResponse()
             .message(ex.getMessage())
-            .error("Validation Error")
+            .error("Error de Validación")
             .status(HttpStatus.BAD_REQUEST.value())
             .timestamp(java.time.OffsetDateTime.now())
             .path(request.getDescription(false).replace("uri=", ""));
@@ -32,7 +34,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleBusinessLogicException(BusinessLogicException ex, WebRequest request) {
         ErrorResponse error = new ErrorResponse()
             .message(ex.getMessage())
-            .error("Business Logic Error")
+            .error("Error de Lógica de Negocio")
             .status(HttpStatus.UNPROCESSABLE_ENTITY.value())
             .timestamp(java.time.OffsetDateTime.now())
             .path(request.getDescription(false).replace("uri=", ""));
@@ -43,7 +45,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleAuthorizationException(AuthorizationException ex, WebRequest request) {
         ErrorResponse error = new ErrorResponse()
             .message("Acceso denegado")
-            .error("Authorization Error")
+            .error("Error de Autorización")
             .status(HttpStatus.FORBIDDEN.value())
             .timestamp(java.time.OffsetDateTime.now())
             .path(request.getDescription(false).replace("uri=", ""));
@@ -54,7 +56,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleResourceNotFoundException(ResourceNotFoundException ex, WebRequest request) {
         ErrorResponse error = new ErrorResponse()
             .message(ex.getMessage())
-            .error("Resource Not Found")
+            .error("Recurso No Encontrado")
             .status(HttpStatus.NOT_FOUND.value())
             .timestamp(java.time.OffsetDateTime.now())
             .path(request.getDescription(false).replace("uri=", ""));
@@ -69,7 +71,7 @@ public class GlobalExceptionHandler {
         
         ErrorResponse error = new ErrorResponse()
             .message("Errores de validación: " + errors)
-            .error("Validation Failed")
+            .error("Error de Validación")
             .status(HttpStatus.BAD_REQUEST.value())
             .timestamp(java.time.OffsetDateTime.now())
             .path(request.getDescription(false).replace("uri=", ""));
@@ -78,9 +80,10 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<ErrorResponse> handleRuntimeException(RuntimeException ex, WebRequest request) {
+        log.error("Runtime exception occurred: ", ex);
         ErrorResponse error = new ErrorResponse()
-            .message("Error en tiempo de ejecución: " + ex.getMessage())
-            .error("Runtime Error")
+            .message("Su operación no pudo ser procesada, consulte con el administrador")
+            .error("Error Interno")
             .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
             .timestamp(java.time.OffsetDateTime.now())
             .path(request.getDescription(false).replace("uri=", ""));
@@ -89,9 +92,10 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleGenericException(Exception ex, WebRequest request) {
+        log.error("Unhandled exception occurred: ", ex);
         ErrorResponse error = new ErrorResponse()
-            .message("Error interno del servidor")
-            .error("Internal Error")
+            .message("Su operación no pudo ser procesada, consulte con el administrador")
+            .error("Error Interno")
             .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
             .timestamp(java.time.OffsetDateTime.now())
             .path(request.getDescription(false).replace("uri=", ""));

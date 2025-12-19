@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MicroBill API Specification</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; line-height: 1.6; }
+        h1, h2, h3 { color: #1976d2; }
+        .endpoint { background: #f5f5f5; padding: 15px; margin: 10px 0; border-radius: 5px; }
+        .method { font-weight: bold; color: #fff; padding: 4px 8px; border-radius: 3px; }
+        .get { background: #4CAF50; }
+        .post { background: #2196F3; }
+        .put { background: #FF9800; }
+        .delete { background: #f44336; }
+        code { background: #f0f0f0; padding: 2px 4px; border-radius: 3px; }
+        pre { background: #f8f8f8; padding: 15px; border-radius: 5px; overflow-x: auto; }
+        .demo-users { background: #e3f2fd; padding: 15px; border-radius: 5px; margin: 20px 0; }
+    </style>
+</head>
+<body>
+    <h1>🧾 MicroBill API Specification</h1>
+    
+    <div class="demo-users">
+        <h3>👥 Demo Users</h3>
+        <p><strong>Admin:</strong> admin@demo.com / Admin#123</p>
+        <p><strong>User:</strong> user@demo.com / User#123</p>
+    </div>
+
+    <h2>🔐 Authentication Service (Port 8081)</h2>
+    
+    <div class="endpoint">
+        <span class="method post">POST</span> <code>/api/auth/login</code>
+        <p>Authenticate user and get JWT token</p>
+        <pre>{
+  "username": "admin@demo.com",
+  "password": "Admin#123"
+}</pre>
+    </div>
+
+    <div class="endpoint">
+        <span class="method post">POST</span> <code>/api/auth/validate</code>
+        <p>Validate JWT token</p>
+    </div>
+
+    <h2>📊 Management Service (Port 8082)</h2>
+    
+    <div class="endpoint">
+        <span class="method get">GET</span> <code>/api/customers</code>
+        <p>Get paginated list of customers</p>
+    </div>
+
+    <div class="endpoint">
+        <span class="method post">POST</span> <code>/api/customers</code>
+        <p>Create new customer</p>
+        <pre>{
+  "name": "New Customer Corp",
+  "docNumber": "999888777",
+  "email": "contact@newcustomer.com",
+  "address": "456 Business Ave"
+}</pre>
+    </div>
+
+    <div class="endpoint">
+        <span class="method get">GET</span> <code>/api/products</code>
+        <p>Get paginated list of products</p>
+    </div>
+
+    <div class="endpoint">
+        <span class="method post">POST</span> <code>/api/products</code>
+        <p>Create new product</p>
+        <pre>{
+  "code": "PROD-001",
+  "name": "New Product",
+  "price": 299.99,
+  "stock": 50,
+  "taxRate": 0.19
+}</pre>
+    </div>
+
+    <h2>🧾 Billing Service (Port 8083)</h2>
+    
+    <div class="endpoint">
+        <span class="method get">GET</span> <code>/api/invoices</code>
+        <p>Get paginated list of invoices</p>
+    </div>
+
+    <div class="endpoint">
+        <span class="method post">POST</span> <code>/api/invoices</code>
+        <p>Create new invoice with automatic calculations</p>
+        <pre>{
+  "customerId": 1,
+  "providerId": 1,
+  "items": [
+    {
+      "productId": 1,
+      "quantity": 2,
+      "unitPrice": 1500.00,
+      "taxRate": 0.19
+    }
+  ]
+}</pre>
+    </div>
+
+    <div class="endpoint">
+        <span class="method post">POST</span> <code>/api/invoices/{id}/generate-report</code>
+        <p>Generate PDF report for invoice</p>
+    </div>
+
+    <h2>🤖 AI Service (Port 8084)</h2>
+    
+    <div class="endpoint">
+        <span class="method post">POST</span> <code>/api/ai/recommendations?customerId={id}</code>
+        <p>Get AI-powered product recommendations</p>
+    </div>
+
+    <div class="endpoint">
+        <span class="method post">POST</span> <code>/api/ai/anomaly-score</code>
+        <p>Detect anomalies in invoice data</p>
+        <pre>{
+  "customerId": 1,
+  "total": 15000.00,
+  "items": [...]
+}</pre>
+    </div>
+
+    <h2>🔗 Interactive Documentation</h2>
+    <ul>
+        <li><a href="http://localhost:8081/swagger-ui.html" target="_blank">Authentication API - Swagger UI</a></li>
+        <li><a href="http://localhost:8082/swagger-ui.html" target="_blank">Management API - Swagger UI</a></li>
+        <li><a href="http://localhost:8083/swagger-ui.html" target="_blank">Billing API - Swagger UI</a></li>
+        <li><a href="http://localhost:8084/docs" target="_blank">AI API - FastAPI Docs</a></li>
+    </ul>
+
+    <p><em>All endpoints except login require JWT authentication with Bearer token.</em></p>
+</body>
+</html>

@@ -7,6 +7,9 @@ servers:
   - url: http://localhost:8083/api
     description: Local server
 
+security:
+  - BearerAuth: []
+
 tags:
   - name: Invoices
     description: Invoice management
@@ -18,6 +21,8 @@ paths:
         - Invoices
       summary: Get all invoices
       operationId: getInvoices
+      security:
+        - BearerAuth: []
       parameters:
         - name: page
           in: query
@@ -58,6 +63,8 @@ paths:
         - Invoices
       summary: Create invoice
       operationId: createInvoice
+      security:
+        - BearerAuth: []
       requestBody:
         required: true
         content:
@@ -96,6 +103,8 @@ paths:
         - Invoices
       summary: Get invoice by ID
       operationId: getInvoiceById
+      security:
+        - BearerAuth: []
       parameters:
         - name: id
           in: path
@@ -133,6 +142,8 @@ paths:
         - Invoices
       summary: Update invoice
       operationId: updateInvoice
+      security:
+        - BearerAuth: []
       parameters:
         - name: id
           in: path
@@ -176,6 +187,8 @@ paths:
         - Invoices
       summary: Delete invoice
       operationId: deleteInvoice
+      security:
+        - BearerAuth: []
       parameters:
         - name: id
           in: path
@@ -211,6 +224,8 @@ paths:
         - Invoices
       summary: Generate PDF report for invoice
       operationId: generateInvoiceReport
+      security:
+        - BearerAuth: []
       parameters:
         - name: id
           in: path
@@ -246,6 +261,13 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
 
 components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT token for authentication
+  
   schemas:
     InvoiceRequest:
       type: object

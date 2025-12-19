@@ -48,6 +48,7 @@
       background: #1976d2;
       color: #fff;
       padding: 0.8rem 1rem;
+      gap: 1rem;
 
       h1 {
         font-size: 1.2rem;
@@ -60,6 +61,21 @@
         font-size: 1.5rem;
         color: #fff;
         cursor: pointer;
+      }
+
+      .api-docs-dropdown {
+        margin-left: auto;
+        margin-right: 1rem;
+        
+        ::ng-deep .p-button {
+          color: #fff !important;
+          border-color: rgba(255, 255, 255, 0.3) !important;
+          
+          &:hover {
+            background: rgba(255, 255, 255, 0.1) !important;
+            border-color: rgba(255, 255, 255, 0.5) !important;
+          }
+        }
       }
 
       .logout-btn {

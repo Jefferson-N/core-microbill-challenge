@@ -9,7 +9,7 @@ import { CardModule } from 'primeng/card';
 import { PanelModule } from 'primeng/panel';
 import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
-import { BillingService, Invoice, InvoiceItem, RecommendationResponse, AnomalyResponse, ProductRecommendation } from '../../core/services/billing.service';
+import { BillingService, Invoice, RecommendationResponse, AnomalyResponse, ProductRecommendation } from '../../core/services/billing.service';
 import { ManagementService, Customer, Provider, Product } from '../../core/services/management.service';
 
 @Component({

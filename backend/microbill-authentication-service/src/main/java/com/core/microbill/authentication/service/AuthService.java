@@ -1,5 +1,7 @@
 package com.core.microbill.authentication.service;
 
+import com.core.microbill.authentication.domain.exception.BusinessLogicException;
+import com.core.microbill.authentication.domain.exception.ValidationException;
 import com.core.microbill.authentication.domain.model.User;
 import com.core.microbill.authentication.domain.port.in.AuthInputPort;
 import com.core.microbill.authentication.domain.port.out.UserOutputPort;
@@ -11,6 +13,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import java.util.HashSet;
 
@@ -34,11 +37,20 @@ public class AuthService implements AuthInputPort {
 
     @Override
     public User register(User user) {
+        if (!StringUtils.hasText(user.getUsername())) {
+            throw new ValidationException("El nombre de usuario es requerido");
+        }
+        if (!StringUtils.hasText(user.getEmail())) {
+            throw new ValidationException("El email es requerido");
+        }
+        if (!StringUtils.hasText(user.getPassword())) {
+            throw new ValidationException("La contraseña es requerida");
+        }
         if (userOutputPort.existsByUsername(user.getUsername())) {
-            throw new RuntimeException("Username already exists");
+            throw new BusinessLogicException("Ya existe un usuario con el nombre " + user.getUsername());
         }
         if (userOutputPort.existsByEmail(user.getEmail())) {
-            throw new RuntimeException("Email already exists");
+            throw new BusinessLogicException("Ya existe un usuario con el email " + user.getEmail());
         }
         
         user.setPassword(passwordEncoder.encode(user.getPassword()));

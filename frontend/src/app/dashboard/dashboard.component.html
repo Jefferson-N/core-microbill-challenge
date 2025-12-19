@@ -17,6 +17,20 @@
     <header class="header">
       <button class="menu-btn" (click)="toggleSidebar()">☰</button>
       <h1>Dashboard</h1>
+      
+      <!-- API Documentation Dropdown -->
+      <div class="api-docs-dropdown">
+        <p-button 
+          label="API Docs" 
+          icon="pi pi-book" 
+          [text]="true"
+          (onClick)="menu.toggle($event)"
+          aria-haspopup="true" 
+          aria-controls="api_menu">
+        </p-button>
+        <p-menu #menu [model]="apiMenuItems" [popup]="true"></p-menu>
+      </div>
+      
       <button class="logout-btn" (click)="logout()">Salir</button>
     </header>
 

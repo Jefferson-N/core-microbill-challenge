@@ -30,7 +30,6 @@ public interface InvoiceResponseMapper {
 
     List<Invoice> toDomainList(List<InvoiceResponse> responses);
 
-    // Conversión BigDecimal ↔ Double
     @Named("bigDecimalToDouble")
     default Double bigDecimalToDouble(BigDecimal value) {
         return value != null ? value.doubleValue() : null;

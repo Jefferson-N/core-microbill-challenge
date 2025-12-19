@@ -102,6 +102,8 @@ paths:
         - Users
       summary: Get all users
       operationId: getUsers
+      security:
+        - BearerAuth: []
       parameters:
         - name: page
           in: query
@@ -139,6 +141,8 @@ paths:
         - Users
       summary: Get user by ID
       operationId: getUserById
+      security:
+        - BearerAuth: []
       parameters:
         - name: id
           in: path

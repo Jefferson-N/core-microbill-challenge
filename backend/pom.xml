@@ -1,15 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.core</groupId>
+    <groupId>com.core.microbill</groupId>
     <artifactId>microbill-parent</artifactId>
     <version>1.0.0-SNAPSHOT</version>
     <packaging>pom</packaging>
-    <name>MicroBill Parent</name>
-    <description>Parent POM for MicroBill microservices</description>
 
     <modules>
         <module>microbill-authentication-service</module>
@@ -18,16 +16,11 @@
     </modules>
 
     <properties>
-        <java.version>21</java.version>
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <spring-boot.version>3.5.8</spring-boot.version>
-        <openapi-generator.version>7.10.0</openapi-generator.version>
-        <mapstruct.version>1.6.3</mapstruct.version>
-        <lombok.version>1.18.36</lombok.version>
-        <jasperreports.version>7.0.1</jasperreports.version>
-        <jjwt.version>0.12.6</jjwt.version>
+        <spring.boot.version>3.5.8</spring.boot.version>
+        <testcontainers.version>1.20.4</testcontainers.version>
     </properties>
 
     <dependencyManagement>
@@ -35,13 +28,38 @@
             <dependency>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-dependencies</artifactId>
-                <version>${spring-boot.version}</version>
+                <version>${spring.boot.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.testcontainers</groupId>
+                <artifactId>testcontainers-bom</artifactId>
+                <version>${testcontainers.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
         </dependencies>
-
     </dependencyManagement>
+
+    <dependencies>
+        <!-- Test Dependencies -->
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>mysql</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>rabbitmq</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
 
     <build>
         <pluginManagement>
@@ -49,12 +67,37 @@
                 <plugin>
                     <groupId>org.springframework.boot</groupId>
                     <artifactId>spring-boot-maven-plugin</artifactId>
-                    <version>${spring-boot.version}</version>
+                    <version>${spring.boot.version}</version>
                 </plugin>
                 <plugin>
-                    <groupId>org.openapitools</groupId>
-                    <artifactId>openapi-generator-maven-plugin</artifactId>
-                    <version>${openapi-generator.version}</version>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <version>3.5.2</version>
+                    <configuration>
+                        <includes>
+                            <include>**/*Test.java</include>
+                            <include>**/*Tests.java</include>
+                        </includes>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-failsafe-plugin</artifactId>
+                    <version>3.5.2</version>
+                    <configuration>
+                        <includes>
+                            <include>**/*IntegrationTest.java</include>
+                            <include>**/*IT.java</include>
+                        </includes>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <goals>
+                                <goal>integration-test</goal>
+                                <goal>verify</goal>
+                            </goals>
+                        </execution>
+                    </executions>
                 </plugin>
             </plugins>
         </pluginManagement>
